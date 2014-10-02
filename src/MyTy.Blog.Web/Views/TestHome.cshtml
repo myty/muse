@@ -1,0 +1,13 @@
+﻿@using System.Web.Optimization
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
+
+@{
+	Layout = null;
+
+	var pageTitle = ((string)ViewBag.Title).ToUpper();
+}
+
+<html>
+<head><title>@ViewBag.Title</title></head>
+<body><h1>@pageTitle</h1></body>
+</html>
