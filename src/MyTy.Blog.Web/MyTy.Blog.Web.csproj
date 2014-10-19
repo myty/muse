@@ -179,6 +179,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\clean-blog.js" />
     <Content Include="Posts\2014\2014-10-25-last-week.md" />
+    <Content Include="Posts\2014\2014-10-19-hello-world-2.md" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
