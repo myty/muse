@@ -4,14 +4,18 @@ using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Optimization;
+using MyTy.Blog.Web.Models;
+using MyTy.Blog.Web.Services;
 using Nancy;
 using Nancy.Bootstrapper;
+using Nancy.Bootstrappers.Ninject;
 using Nancy.Conventions;
 using Nancy.TinyIoc;
+using Ninject;
 
 namespace MyTy.Blog.Web
 {
-	public class CustomBoostrapper : DefaultNancyBootstrapper
+	public class CustomBoostrapper : NinjectNancyBootstrapper
 	{
 		protected override void ConfigureConventions(NancyConventions conventions)
 		{
@@ -30,20 +34,29 @@ namespace MyTy.Blog.Web
 				StaticContentConventionBuilder.AddDirectory("/img", "/Images"));
 		}
 
-		protected override void ConfigureApplicationContainer(TinyIoCContainer container)
+		protected override void ConfigureApplicationContainer(IKernel existingContainer)
 		{
-			base.ConfigureApplicationContainer(container);
+			existingContainer
+				.Bind<BlogDB>().ToSelf()
+				.InSingletonScope();
+
+			existingContainer
+				.Bind<PostScanner>().ToSelf()
+				.InSingletonScope()
+				.OnActivation((c, ps) => ps.Start());
+
+			var scanner = existingContainer.TryGet<PostScanner>();
+
+			base.ConfigureApplicationContainer(existingContainer);
 		}
 
-		protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
+		protected override void ConfigureRequestContainer(IKernel container, NancyContext context)
 		{
 			base.ConfigureRequestContainer(container, context);
 		}
 
-		protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
+		protected override void ApplicationStartup(IKernel container, IPipelines pipelines)
 		{
-			//base.ApplicationStartup(container, pipelines);
-
 			var scriptBundle = new ScriptBundle("~/js-base")
 				.Include("~/Scripts/jquery-{version}.js")
 				.Include("~/Scripts/bootstrap.js")
@@ -57,6 +70,8 @@ namespace MyTy.Blog.Web
 			BundleTable.Bundles.Add(styleBundle);
 
 			BundleTable.EnableOptimizations = false;
+
+			base.ApplicationStartup(container, pipelines);
 		}
 	}
 }
