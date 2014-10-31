@@ -14,7 +14,8 @@ namespace MyTy.Blog.Web
 	{
 		public void Configuration(IAppBuilder app)
 		{
-			app.UseNancy(options => options.PassThroughWhenStatusCodesAre(HttpStatusCode.NotFound));
+			//app.UseNancy(options => options.PassThroughWhenStatusCodesAre(HttpStatusCode.NotFound));
+			app.UseNancy();
 			app.UseStageMarker(PipelineStage.MapHandler);
 		}
 	}

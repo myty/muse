@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Optimization;
 using MyTy.Blog.Web.Models;
+using MyTy.Blog.Web.Modules;
 using MyTy.Blog.Web.Services;
 using Nancy;
 using Nancy.Bootstrapper;
@@ -42,10 +43,12 @@ namespace MyTy.Blog.Web
 
 			existingContainer
 				.Bind<PostScanner>().ToSelf()
-				.InSingletonScope()
-				.OnActivation((c, ps) => ps.Start());
+				.InSingletonScope();
 
 			var scanner = existingContainer.TryGet<PostScanner>();
+			if (scanner != null) {
+				scanner.Start();
+			}
 
 			base.ConfigureApplicationContainer(existingContainer);
 		}

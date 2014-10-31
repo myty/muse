@@ -21,10 +21,17 @@ namespace MyTy.Blog.Web.Modules
 				}];
 			};
 
-			Get["/{slug}"] = parameters => {
-				var post = db.Posts.FirstOrDefault(p => p.Slug == parameters.slug);
+			Get["/{year}/{month}/{day}/{slug}"] = parameters => {
+				var fileLocation = String.Format("Posts\\{0}\\{0}-{1}-{2}-{3}.md",
+					parameters.year, parameters.month, parameters.day, parameters.slug);
 
-				return View["Post", new PostDetailViewModel {
+				var post = db.Posts.FirstOrDefault(p => p.FileLocation == fileLocation);
+
+				if (post == null) {
+					return Response.AsError(HttpStatusCode.NotFound);
+				}
+
+				return View[post.Layout, new PostDetailViewModel {
 					Post = post
 				}];
 			};

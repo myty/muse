@@ -1,9 +1,10 @@
 ---
-title: "Last Week"
-subTitle: "Speaking of last week....did you hear the one about the _____?"
-headerBg: "img/home-bg.jpg"
-date: 2014-10-25 -1100
+title: "Introduction"
+subTitle: "Hello, my name is Michael."
+headerBg: "/img/home-bg.jpg"
+date: 2014-10-17 -1100
 comments: true
+layout: post
 ---
 
 This is my attempt at leaving my mark in the universe....fullfilling my destiny...leaving a legacy...or however you might say it.
