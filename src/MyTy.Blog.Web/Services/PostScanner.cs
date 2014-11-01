@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 using Biggy;
 using Biggy.JSON;
@@ -22,22 +23,24 @@ namespace MyTy.Blog.Web.Services
 			this.rxDirectory = new ReactiveDirectory(@"~/Posts", "md");
 		}
 
-		public void Start()
+		public async Task Start()
 		{
 			subscriptions[0] = rxDirectory.UpdatedFiles.Subscribe(FileUpdated);
 			subscriptions[1] = rxDirectory.DeletedFiles.Subscribe(FileDeleted);
 
-			rxDirectory.Start();
+			await rxDirectory.Start();
 			
 			//remove any files that may have been deleted while server was not running
-			var deleteFiles = db.Posts
-				.Select(p => p.FileLocation)
-				.Select(f => Path.Combine(siteBasePath, f))
-				.Where(f => !File.Exists(f));
+			await Task.Factory.StartNew(() => { 
+				var deleteFiles = db.Posts
+					.Select(p => p.FileLocation)
+					.Select(f => Path.Combine(siteBasePath, f))
+					.Where(f => !File.Exists(f));
 
-			foreach (var file in deleteFiles) {
-				FileDeleted(file);
-			}
+				foreach (var file in deleteFiles) {
+					FileDeleted(file);
+				}
+			});
 		}
 
 		public void Stop()

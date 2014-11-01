@@ -1,6 +1,6 @@
 ---
 title: "Introduction (Hello, World!)"
-subTitle: "Hello, my name is Michael."
+subTitle: "Hello, my name is Michael. This is my introduction."
 headerBg: "/img/home-bg.jpg"
 date: 2014-10-17 -1100
 comments: true

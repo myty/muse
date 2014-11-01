@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using System.Web.Hosting;
-using Biggy;
-using Biggy.JSON;
-using MyTy.Blog.Web.Models;
 
 namespace MyTy.Blog.Web.Services
 {
@@ -38,15 +35,8 @@ namespace MyTy.Blog.Web.Services
 				NotifyFilters.Security;
 			watcher.Filter = "*" + fileExtension;
 
-			var bufferedChanges = fileChanges
-				.GroupBy(k => k.FilePath)
-				.SelectMany(k => k
-					.Throttle(TimeSpan.FromSeconds(1)));
-
-			UpdatedFiles = bufferedChanges.Where(b => !b.DeleteThis).Select(b => b.FilePath);
-			DeletedFiles = bufferedChanges.Where(b => b.DeleteThis).Select(b => b.FilePath);
-
-			Observable.Merge(
+			var bufferedChanges = Observable.Merge(
+				fileChanges,
 				Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 					h => watcher.Deleted += h,
 					h => watcher.Deleted -= h)
@@ -76,9 +66,13 @@ namespace MyTy.Blog.Web.Services
 						h => watcher.Created -= h))
 					.Select(f => new ContentFile {
 						FilePath = f.EventArgs.FullPath
-					})
-				)
-				.Subscribe(c => fileChanges.OnNext(c));
+					}))
+				.GroupBy(k => k.FilePath)
+				.SelectMany(k => k
+					.Throttle(TimeSpan.FromSeconds(1)));
+
+			UpdatedFiles = bufferedChanges.Where(b => !b.DeleteThis).Select(b => b.FilePath);
+			DeletedFiles = bufferedChanges.Where(b => b.DeleteThis).Select(b => b.FilePath);
 		}
 
 		public IObservable<string> UpdatedFiles { get; private set; }
@@ -90,17 +84,20 @@ namespace MyTy.Blog.Web.Services
 			public bool DeleteThis { get; set; }
 		}
 
-		public void Start()
+		public async Task Start()
 		{
 			watcher.EnableRaisingEvents = true;
-			var contentFiles = Directory.EnumerateFiles(watcher.Path, watcher.Filter, SearchOption.AllDirectories)
-				.Select(e => new ContentFile {
-					FilePath = e
-				});
 
-			foreach (var c in contentFiles) {
-				fileChanges.OnNext(c);
-			}
+			await Task.Factory.StartNew(() => { 
+				var contentFiles = Directory.EnumerateFiles(watcher.Path, watcher.Filter, SearchOption.AllDirectories)
+					.Select(e => new ContentFile {
+						FilePath = e
+					});
+
+				foreach (var c in contentFiles) {
+					fileChanges.OnNext(c);
+				}
+			});
 		}
 
 		public void Stop()

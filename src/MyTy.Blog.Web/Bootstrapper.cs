@@ -50,7 +50,9 @@ namespace MyTy.Blog.Web
 
 			var scanner = existingContainer.TryGet<PostScanner>();
 			if (scanner != null) {
-				scanner.Start();
+				scanner.Start().ContinueWith(t => {
+					Debug.WriteLine("Posts scanner started.");
+				});
 			}
 
 			base.ConfigureApplicationContainer(existingContainer);
