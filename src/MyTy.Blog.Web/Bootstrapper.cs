@@ -32,6 +32,9 @@ namespace MyTy.Blog.Web
 				StaticContentConventionBuilder.AddDirectory("/fonts"));
 
 			conventions.StaticContentsConventions.Add(
+				StaticContentConventionBuilder.AddDirectory("/scripts"));
+
+			conventions.StaticContentsConventions.Add(
 				StaticContentConventionBuilder.AddDirectory("/img", "/Images"));
 		}
 

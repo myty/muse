@@ -19,16 +19,25 @@ namespace MyTy.Blog.Web.Services
 		public PostScanner(BlogDB db)
 		{
 			this.db = db;
-			this.rxDirectory = new ReactiveDirectory(@"~/Posts");
+			this.rxDirectory = new ReactiveDirectory(@"~/Posts", "md");
 		}
 
 		public void Start()
 		{
-			subscriptions[0] = rxDirectory.UpdatedFiles.Subscribe(OnFileUpdated);
-			subscriptions[1] = rxDirectory.DeletedFiles.Subscribe(OnFileDeleted);
+			subscriptions[0] = rxDirectory.UpdatedFiles.Subscribe(FileUpdated);
+			subscriptions[1] = rxDirectory.DeletedFiles.Subscribe(FileDeleted);
 
 			rxDirectory.Start();
-			rxDirectory.CheckFiles(db.Posts.Select(p => p.FileLocation).ToArray());
+			
+			//remove any files that may have been deleted while server was not running
+			var deleteFiles = db.Posts
+				.Select(p => p.FileLocation)
+				.Select(f => Path.Combine(siteBasePath, f))
+				.Where(f => !File.Exists(f));
+
+			foreach (var file in deleteFiles) {
+				FileDeleted(file);
+			}
 		}
 
 		public void Stop()
@@ -51,7 +60,7 @@ namespace MyTy.Blog.Web.Services
 			rxDirectory.Dispose();
 		}
 
-		private void OnFileUpdated(string file)
+		private void FileUpdated(string file)
 		{
 			var postFilePath = file;
 			var fileText = File.ReadAllText(postFilePath);
@@ -143,7 +152,7 @@ namespace MyTy.Blog.Web.Services
 			}
 		}
 
-		private void OnFileDeleted(string file)
+		private void FileDeleted(string file)
 		{
 			var deletePost = db.Posts.FirstOrDefault(p =>
 					p.FileLocation == file.Replace(this.siteBasePath, ""));

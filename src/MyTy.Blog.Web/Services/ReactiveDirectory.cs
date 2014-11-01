@@ -14,10 +14,12 @@ namespace MyTy.Blog.Web.Services
 	public class ReactiveDirectory : IDisposable
 	{
 		readonly FileSystemWatcher watcher = new FileSystemWatcher();
-		readonly Subject<ContentFile> fileChangeStream = new Subject<ContentFile>();
+		readonly Subject<ContentFile> fileChanges = new Subject<ContentFile>();
 
-		public ReactiveDirectory(string directoryPath)
+		public ReactiveDirectory(string directoryPath, string fileType)
 		{
+			var fileExtension = "." + fileType;
+
 			if (String.IsNullOrWhiteSpace(directoryPath)) {
 				throw new ArgumentNullException("directoryPath");
 			}
@@ -34,15 +36,15 @@ namespace MyTy.Blog.Web.Services
 				NotifyFilters.LastWrite |
 				NotifyFilters.Size |
 				NotifyFilters.Security;
-			watcher.Filter = "*.md";
+			watcher.Filter = "*" + fileExtension;
 
-			var bufferedChangeStream = Observable.Merge(
-				fileChangeStream
-					.GroupBy(k => k.FilePath).Select(k => k
-					.Throttle(TimeSpan.FromSeconds(1))));
+			var bufferedChanges = fileChanges
+				.GroupBy(k => k.FilePath)
+				.SelectMany(k => k
+					.Throttle(TimeSpan.FromSeconds(1)));
 
-			UpdatedFiles = bufferedChangeStream.Where(b => !b.DeleteThis).Select(b => b.FilePath);
-			DeletedFiles = bufferedChangeStream.Where(b => b.DeleteThis).Select(b => b.FilePath);
+			UpdatedFiles = bufferedChanges.Where(b => !b.DeleteThis).Select(b => b.FilePath);
+			DeletedFiles = bufferedChanges.Where(b => b.DeleteThis).Select(b => b.FilePath);
 
 			Observable.Merge(
 				Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
@@ -64,7 +66,7 @@ namespace MyTy.Blog.Web.Services
 							FilePath = f.EventArgs.FullPath
 						}
 					})
-					.Where(f => f.FilePath.EndsWith(".md")),
+					.Where(f => f.FilePath.EndsWith(fileExtension)),
 				Observable.Merge(
 					Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
 						h => watcher.Changed += h,
@@ -76,7 +78,7 @@ namespace MyTy.Blog.Web.Services
 						FilePath = f.EventArgs.FullPath
 					})
 				)
-				.Subscribe(c => fileChangeStream.OnNext(c));
+				.Subscribe(c => fileChanges.OnNext(c));
 		}
 
 		public IObservable<string> UpdatedFiles { get; private set; }
@@ -88,19 +90,6 @@ namespace MyTy.Blog.Web.Services
 			public bool DeleteThis { get; set; }
 		}
 
-		public void CheckFiles(IEnumerable<string> filePaths)
-		{
-			var baseDir = HostingEnvironment.MapPath("~/");
-			foreach (var file in filePaths.Select(f => Path.Combine(baseDir, f))) {
-				if (!File.Exists(file)) {
-					fileChangeStream.OnNext(new ContentFile { 
-						DeleteThis = true,
-						FilePath = file
-					});
-				}
-			}
-		}
-
 		public void Start()
 		{
 			watcher.EnableRaisingEvents = true;
@@ -110,7 +99,7 @@ namespace MyTy.Blog.Web.Services
 				});
 
 			foreach (var c in contentFiles) {
-				fileChangeStream.OnNext(c);
+				fileChanges.OnNext(c);
 			}
 		}
 
