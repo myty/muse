@@ -28,10 +28,10 @@ namespace MyTy.Blog.Web.Services
 			subscriptions[0] = rxDirectory.UpdatedFiles.Subscribe(FileUpdated);
 			subscriptions[1] = rxDirectory.DeletedFiles.Subscribe(FileDeleted);
 
-			await rxDirectory.Start();
+			var rxDirStartup = rxDirectory.Start();
 			
 			//remove any files that may have been deleted while server was not running
-			await Task.Factory.StartNew(() => { 
+			var findDeletedFilesTask = Task.Factory.StartNew(() => { 
 				var deleteFiles = db.Posts
 					.Select(p => p.FileLocation)
 					.Select(f => Path.Combine(siteBasePath, f))
@@ -41,6 +41,8 @@ namespace MyTy.Blog.Web.Services
 					FileDeleted(file);
 				}
 			});
+
+			await Task.WhenAll(rxDirStartup, findDeletedFilesTask);
 		}
 
 		public void Stop()
