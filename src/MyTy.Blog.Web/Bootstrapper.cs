@@ -48,9 +48,19 @@ namespace MyTy.Blog.Web
 				.Bind<PostScanner>().ToSelf()
 				.InSingletonScope();
 
-			var scanner = existingContainer.TryGet<PostScanner>();
-			if (scanner != null) {
-				scanner.Start().ContinueWith(t => {
+			existingContainer
+				.Bind<PageScanner>().ToSelf()
+				.InSingletonScope();
+
+			var postScanner = existingContainer.TryGet<PostScanner>();
+			var pageScanner = existingContainer.TryGet<PageScanner>();
+			if (postScanner != null) {
+				postScanner.Start().ContinueWith(t => {
+					Debug.WriteLine("Posts scanner started.");
+				});
+			}
+			if (pageScanner != null) {
+				pageScanner.Start().ContinueWith(t => {
 					Debug.WriteLine("Posts scanner started.");
 				});
 			}

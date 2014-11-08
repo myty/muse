@@ -182,6 +182,9 @@
     <Content Include="Scripts\clean-blog.js" />
     <Content Include="Posts\2014\2014-10-19-hello-world-2.md" />
     <Content Include="Posts\2014\2014-10-17-introduction.md" />
+    <Content Include="Pages\about.md" />
+    <Content Include="Pages\sample-post.md" />
+    <Content Include="Pages\contact.md" />
     <None Include="Properties\PublishProfiles\FTP.pubxml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
@@ -206,14 +209,18 @@
     <Compile Include="BlogStartup.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Models\BlogDB.cs" />
+    <Compile Include="Models\Page.cs" />
     <Compile Include="Models\Post.cs" />
     <Compile Include="Modules\ErrorHandler.cs" />
+    <Compile Include="Modules\PageModule.cs" />
     <Compile Include="Modules\PostModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\PageScanner.cs" />
     <Compile Include="Services\ReactiveDirectory.cs" />
     <Compile Include="Services\PostScanner.cs" />
     <Compile Include="Services\YamlExtensions.cs" />
     <Compile Include="ViewModels\ErrorViewModel.cs" />
+    <Compile Include="ViewModels\PageDetailViewModel.cs" />
     <Compile Include="ViewModels\PostDetailViewModel.cs" />
     <Compile Include="ViewModels\PostIndexViewModel.cs" />
   </ItemGroup>

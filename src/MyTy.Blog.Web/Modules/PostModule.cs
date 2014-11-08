@@ -17,7 +17,7 @@ namespace MyTy.Blog.Web.Modules
 				
 				return View["Home", new PostIndexViewModel {
 					Page = 1,
-					Posts = db.Posts.OrderByDescending(p => p.PostDate).ToArray()
+					Posts = db.Posts.OrderByDescending(p => p.Date).ToArray()
 				}];
 			};
 

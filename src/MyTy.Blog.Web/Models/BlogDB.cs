@@ -11,11 +11,15 @@ namespace MyTy.Blog.Web.Models
 	public class BlogDB
 	{
 		public BiggyList<Post> Posts;
+		public BiggyList<Page> Pages;
 
 		public BlogDB()
 		{
-			Posts = new BiggyList<Post>(new JsonStore<Post>(dbPath:
-				HostingEnvironment.MapPath("~/App_Data/"))); 
+			var app_data = HostingEnvironment.MapPath("~/App_Data/");
+
+			Posts = new BiggyList<Post>(new JsonStore<Post>(dbPath: app_data));
+
+			Pages = new BiggyList<Page>(new JsonStore<Page>(dbPath: app_data)); 
 		}  
 
 	}

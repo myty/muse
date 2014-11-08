@@ -10,17 +10,17 @@ using MyTy.Blog.Web.Models;
 
 namespace MyTy.Blog.Web.Services
 {
-	public class PostScanner
+	public class PageScanner
 	{
 		readonly BlogDB db;
 		readonly ReactiveDirectory rxDirectory;
 		readonly IDisposable[] subscriptions = new IDisposable[2];
 		readonly string siteBasePath = HostingEnvironment.MapPath(@"~/");
 		
-		public PostScanner(BlogDB db)
+		public PageScanner(BlogDB db)
 		{
 			this.db = db;
-			this.rxDirectory = new ReactiveDirectory(@"~/Posts", "md");
+			this.rxDirectory = new ReactiveDirectory(@"~/Pages", "md");
 		}
 
 		public async Task Start()
@@ -32,7 +32,7 @@ namespace MyTy.Blog.Web.Services
 			
 			//remove any files that may have been deleted while server was not running
 			var findDeletedFilesTask = Task.Factory.StartNew(() => { 
-				var deleteFiles = db.Posts
+				var deleteFiles = db.Pages
 					.Select(p => p.FileLocation)
 					.Select(f => Path.Combine(siteBasePath, f))
 					.Where(f => !File.Exists(f));
@@ -67,14 +67,14 @@ namespace MyTy.Blog.Web.Services
 
 		private void FileUpdated(string file)
 		{
-			var postFilePath = file;
-			var fileText = File.ReadAllText(postFilePath);
+			var pageFilePath = file;
+			var fileText = File.ReadAllText(pageFilePath);
 			var metadata = fileText.YamlHeader();
 
 			//validate that there is a title
 			if (metadata.ContainsKey("title") && (metadata["title"] == null || (string)metadata["title"] == "nil")) return;
 
-			var fileLocation = postFilePath.Replace(this.siteBasePath, "");
+			var fileLocation = pageFilePath.Replace(this.siteBasePath, "");
 
 			var subTitle = (metadata.ContainsKey("subTitle") && metadata["subTitle"] != null && (string)metadata["subTitle"] != "nil") ?
 				metadata["subTitle"] as string :
@@ -86,96 +86,84 @@ namespace MyTy.Blog.Web.Services
 
 			var layout = (metadata.ContainsKey("layout") && metadata["layout"] != null && (string)metadata["layout"] != "nil") ?
 				metadata["layout"] as string :
-				"post";
+				"page";
 
-			var allowComments = (metadata.ContainsKey("comments") && metadata["comments"] != null && (string)metadata["comments"] != "nil") ?
-				Boolean.Parse((string)metadata["comments"]) :
-				false;
-
-			var postDate = (metadata.ContainsKey("date") && metadata["date"] != null && (string)metadata["date"] != "nil") ?
+			var pageDate = (metadata.ContainsKey("date") && metadata["date"] != null && (string)metadata["date"] != "nil") ?
 				DateTime.Parse((string)metadata["date"]) :
 				DateTime.MaxValue;
 
 			var title = metadata["title"] as string;
 
 			var content = CommonMark.CommonMarkConverter.Convert(fileText.ExcludeHeader());
-			var filename = Path.GetFileName(postFilePath);
+			var filename = Path.GetFileName(pageFilePath);
 			var href = GetHref(filename);
 
-			var post = db.Posts.FirstOrDefault(p => p.FileLocation == fileLocation);
-			if (post == null) {
-				db.Posts.Add(new Post {
+			var page = db.Pages.FirstOrDefault(p => p.FileLocation == fileLocation);
+			if (page == null) {
+				db.Pages.Add(new Page {
 					Href = href,
 					Title = title,
 					Content = content,
 					SubTitle = subTitle,
 					HeaderBackgroundImage = headerBg,
-					Comments = allowComments,
 					FileLocation = fileLocation,
-					Date = postDate,
+					Date = pageDate,
 					Layout = layout
 
 				});
 			} else {
-				if (post.Date != postDate) {
-					post.Date = postDate;
+				if (page.Date != pageDate) {
+					page.Date = pageDate;
 				}
 
-				if (post.FileLocation != fileLocation) {
-					post.FileLocation = fileLocation;
+				if (page.FileLocation != fileLocation) {
+					page.FileLocation = fileLocation;
 				}
 
-				if (post.Href != href) {
-					post.Href = href;
+				if (page.Href != href) {
+					page.Href = href;
 				}
 
-				if (post.Title != title) {
-					post.Title = title;
+				if (page.Title != title) {
+					page.Title = title;
 				}
 
-				if (post.HeaderBackgroundImage != headerBg) {
-					post.HeaderBackgroundImage = headerBg;
+				if (page.HeaderBackgroundImage != headerBg) {
+					page.HeaderBackgroundImage = headerBg;
 				}
 
-				if (post.Content != content) {
-					post.Content = content;
+				if (page.Content != content) {
+					page.Content = content;
 				}
 
-				if (post.SubTitle != subTitle) {
-					post.SubTitle = subTitle;
+				if (page.SubTitle != subTitle) {
+					page.SubTitle = subTitle;
 				}
 
-				if (post.Comments != allowComments) {
-					post.Comments = allowComments;
+				if (page.Layout != layout) {
+					page.Layout = layout;
 				}
 
-				if (post.Layout != layout) {
-					post.Layout = layout;
-				}
-
-				db.Posts.Update(post);
+				db.Pages.Update(page);
 			}
 		}
 
 		private void FileDeleted(string file)
 		{
-			var deletePost = db.Posts.FirstOrDefault(p =>
+			var deletePage = db.Pages.FirstOrDefault(p =>
 					p.FileLocation == file.Replace(this.siteBasePath, ""));
 
-			if (deletePost != null) {
-				db.Posts.Remove(deletePost);
+			if (deletePage != null) {
+				db.Pages.Remove(deletePage);
 			}
 		}
 
 		private string GetHref(string filePath)
 		{
 			var filename = Path.GetFileName(filePath);
-			var slug = filename.Substring(11, filename.Length - 14);
-			var year = filename.Substring(0, 4);
-			var month = filename.Substring(5, 2);
-			var day = filename.Substring(8, 2);
+			var slug = filename.Substring(0, filename.Length - 3);
 
-			return String.Format("/{0}/{1}/{2}/{3}", year, month, day, slug);
+			return String.Format("/{0}", slug);
 		}
 	}
 }
