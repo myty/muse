@@ -206,12 +206,14 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationConfiguration.cs" />
     <Compile Include="BlogStartup.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Models\BlogDB.cs" />
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\Post.cs" />
     <Compile Include="Modules\ErrorHandler.cs" />
+    <Compile Include="Modules\SiteMapModule.cs" />
     <Compile Include="Modules\PageModule.cs" />
     <Compile Include="Modules\PostModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

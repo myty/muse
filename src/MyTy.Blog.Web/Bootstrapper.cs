@@ -52,6 +52,11 @@ namespace MyTy.Blog.Web
 				.Bind<PageScanner>().ToSelf()
 				.InSingletonScope();
 
+			existingContainer
+				.Bind<IApplicationConfiguration>()
+				.To<ApplicationConfiguration>()
+				.InSingletonScope();
+
 			var postScanner = existingContainer.TryGet<PostScanner>();
 			var pageScanner = existingContainer.TryGet<PageScanner>();
 			if (postScanner != null) {
