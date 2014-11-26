@@ -14,9 +14,10 @@ namespace MyTy.Blog.Web.Modules
 		public SiteMapModule(BlogDB db, IApplicationConfiguration config)
 		{
 			Get["/sitemap.xml"] = parameters => {
-				if (config.CanRefresh(Request.Query["key"])) {
+				var apikey = Request.Query["key"];
+				//if (config.CanRefresh(apikey)) {
 
-				}
+				//}
 
 				XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
