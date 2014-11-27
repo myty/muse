@@ -174,12 +174,9 @@
     <Content Include="Content\clean-blog.less" />
     <Content Include="Content\mixins.less" />
     <Content Include="Content\variables.less" />
-    <Content Include="Posts\2014\2014-10-18-hello-world.md" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\clean-blog.js" />
-    <Content Include="Posts\2014\2014-10-19-hello-world-2.md" />
-    <Content Include="Posts\2014\2014-10-17-introduction.md" />
     <Content Include="Pages\about.md" />
     <Content Include="Pages\sample-post.md" />
     <Content Include="Pages\contact.md" />
