@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using MyTy.Blog.Web.Models;
-using MyTy.Blog.Web.ViewModels;
-using Nancy;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Hosting;
 using System.Xml.Linq;
 using MyTy.Blog.Web.Models;
@@ -58,7 +49,8 @@ namespace MyTy.Blog.Web.Modules
 				var deletePosts = db.Posts
 					.Select(p => p.FileLocation)
 					.Select(f => Path.Combine(siteBasePath, f))
-					.Where(f => !File.Exists(f));
+					.Where(f => !File.Exists(f))
+					.ToArray();
 
 				var postsUpdater = new PostUpdater(db);
 				foreach (var file in deletePosts) {
@@ -74,7 +66,8 @@ namespace MyTy.Blog.Web.Modules
 				var deletePages = db.Pages
 					.Select(p => p.FileLocation)
 					.Select(f => Path.Combine(siteBasePath, f))
-					.Where(f => !File.Exists(f));
+					.Where(f => !File.Exists(f))
+					.ToArray();
 
 				var pagesUpdater = new PageUpdater(db);
 				foreach (var file in deletePages) {
