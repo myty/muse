@@ -188,6 +188,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Posts\2014\2014-11-26-happy-thanksgiving.md" />
     <None Include="Properties\PublishProfiles\FTP.pubxml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
@@ -221,7 +222,10 @@
     <Compile Include="Modules\PageModule.cs" />
     <Compile Include="Modules\PostModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\IFileUpdater.cs" />
     <Compile Include="Services\PageScanner.cs" />
+    <Compile Include="Services\PageUpdater.cs" />
+    <Compile Include="Services\PostUpdater.cs" />
     <Compile Include="Services\ReactiveDirectory.cs" />
     <Compile Include="Services\PostScanner.cs" />
     <Compile Include="Services\YamlExtensions.cs" />

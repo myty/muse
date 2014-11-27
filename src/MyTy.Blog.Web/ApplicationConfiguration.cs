@@ -13,6 +13,11 @@ namespace MyTy.Blog.Web
 
 	public class ApplicationConfiguration : IApplicationConfiguration
 	{
+		public ApplicationConfiguration()
+		{
+
+		}
+
 		public bool CanRefresh(string passcode)
 		{
 			return true;
