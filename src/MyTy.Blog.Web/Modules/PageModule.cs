@@ -1,12 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Xml.Linq;
 using MyTy.Blog.Web.Models;
+using MyTy.Blog.Web.Models.Github;
 using MyTy.Blog.Web.Services;
 using MyTy.Blog.Web.ViewModels;
 using Nancy;
+using Refit;
 
 namespace MyTy.Blog.Web.Modules
 {
@@ -21,9 +24,9 @@ namespace MyTy.Blog.Web.Modules
 			this.db = db;
 			this.config = config;
 
-			Get["/{slug}"] = parameters => {
+			Get["/{slug}", true] = async (parameters, ct) => {
 				if (parameters.slug == "sitemap") {
-					return Sitemap();
+					return await Sitemap();
 				}
 
 				var fileLocation = String.Format("Pages\\{0}.md", parameters.slug);
@@ -40,11 +43,23 @@ namespace MyTy.Blog.Web.Modules
 			};
 		}
 
-		private dynamic Sitemap()
+		private async Task<dynamic> Sitemap()
 		{
 			var apikey = Request.Query["key"];
 			if (config.CanRefresh(apikey)) {
-				//rebuild the pages and post dbs
+				var postsPath = HostingEnvironment.MapPath("~/Posts");
+				var pagesPath = HostingEnvironment.MapPath("~/Pages");
+
+				//TODO: Get token from Github and store in config file that does not get pushed to source control
+				var token = "";
+				if (!String.IsNullOrWhiteSpace(token)) {
+					var postsMirror = new GitHubMirror("myty", "shiny-myty-website", "src/MyTy.Blog.Web/Posts", postsPath, token);
+					var pagesMirror = new GitHubMirror("myty", "shiny-myty-website", "src/MyTy.Blog.Web/Pages", pagesPath, token);
+
+					var postsSynced = await postsMirror.SynchronizeAsync();
+					var pagesSynced = await pagesMirror.SynchronizeAsync();
+				}
+
 				//POSTS
 				var deletePosts = db.Posts
 					.Select(p => p.FileLocation)
@@ -57,7 +72,6 @@ namespace MyTy.Blog.Web.Modules
 					postsUpdater.FileDeleted(file);
 				}
 
-				var postsPath = HostingEnvironment.MapPath("~/Posts");
 				foreach (var file in Directory.EnumerateFiles(postsPath, "*.md", SearchOption.AllDirectories)) {
 					postsUpdater.FileUpdated(file);
 				}
@@ -74,7 +88,6 @@ namespace MyTy.Blog.Web.Modules
 					pagesUpdater.FileDeleted(file);
 				}
 
-				var pagesPath = HostingEnvironment.MapPath("~/Pages");
 				foreach (var file in Directory.EnumerateFiles(pagesPath, "*.md", SearchOption.AllDirectories)) {
 					pagesUpdater.FileUpdated(file);
 				}
