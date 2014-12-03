@@ -45,8 +45,7 @@ namespace MyTy.Blog.Web.Modules
 
 		private async Task<dynamic> Sitemap()
 		{
-			var apikey = Request.Query["key"];
-			if (config.CanRefresh(apikey)) {
+			if (config.CanRefresh(Request)) {
 				var postsPath = HostingEnvironment.MapPath("~/Posts");
 				var pagesPath = HostingEnvironment.MapPath("~/Pages");
 
@@ -72,7 +71,7 @@ namespace MyTy.Blog.Web.Modules
 					postsUpdater.FileDeleted(file);
 				}
 
-				foreach (var file in Directory.EnumerateFiles(postsPath, "*.md", SearchOption.AllDirectories)) {
+				foreach (var file in Directory.EnumerateFiles(postsPath, "*", SearchOption.AllDirectories)) {
 					postsUpdater.FileUpdated(file);
 				}
 
@@ -88,7 +87,7 @@ namespace MyTy.Blog.Web.Modules
 					pagesUpdater.FileDeleted(file);
 				}
 
-				foreach (var file in Directory.EnumerateFiles(pagesPath, "*.md", SearchOption.AllDirectories)) {
+				foreach (var file in Directory.EnumerateFiles(pagesPath, "*", SearchOption.AllDirectories)) {
 					pagesUpdater.FileUpdated(file);
 				}
 			}
