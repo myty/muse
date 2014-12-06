@@ -24,12 +24,12 @@ namespace MyTy.Blog.Web.Modules
 			this.db = db;
 			this.config = config;
 
-			Get["/{slug}", true] = async (parameters, ct) => {
+			Get["/{slug}"] = (parameters) => {
 				if (parameters.slug == "sitemap") {
-					return await Sitemap();
+					return Sitemap();
 				}
 
-				var fileLocation = String.Format("Pages\\{0}.md", parameters.slug);
+				var fileLocation = String.Format("App_Data\\Content\\Pages\\{0}.md", parameters.slug);
 
 				var page = db.Pages.FirstOrDefault(p => p.FileLocation == fileLocation);
 
@@ -41,57 +41,74 @@ namespace MyTy.Blog.Web.Modules
 					Page = page
 				}];
 			};
+
+			Post["/{slug}", true] = async (parameters, ct) => {
+				if (parameters.slug == "sitemap") {
+					if (config.CanRefresh(Request)) {
+						await GetLatestContent();
+					}
+
+					return Sitemap();
+				}
+
+				return Response.AsError(HttpStatusCode.ServiceUnavailable);
+			};
 		}
 
-		private async Task<dynamic> Sitemap()
+		private async Task GetLatestContent()
 		{
-			if (config.CanRefresh(Request)) {
-				var postsPath = HostingEnvironment.MapPath("~/Posts");
-				var pagesPath = HostingEnvironment.MapPath("~/Pages");
+			var postsPath = HostingEnvironment.MapPath("~/App_Data/Content/Posts");
+			var pagesPath = HostingEnvironment.MapPath("~/App_Data/Content/Pages");
+			var imagesPath = HostingEnvironment.MapPath("~/App_Data/Content/Images");
 
-				//TODO: Get token from Github and store in config file that does not get pushed to source control
-				var token = "";
-				if (!String.IsNullOrWhiteSpace(token)) {
-					var postsMirror = new GitHubMirror("myty", "shiny-myty-website", "src/MyTy.Blog.Web/Posts", postsPath, token);
-					var pagesMirror = new GitHubMirror("myty", "shiny-myty-website", "src/MyTy.Blog.Web/Pages", pagesPath, token);
+			var token = config.GitHubToken;
+			if (!String.IsNullOrWhiteSpace(token)) {
+				var postsMirror = new GitHubMirror("myty", "slick-blog-content", "_posts", postsPath, token);
+				var pagesMirror = new GitHubMirror("myty", "slick-blog-content", "_pages", pagesPath, token);
+				var imagesMirror = new GitHubMirror("myty", "slick-blog-content", "_imgs", imagesPath, token);
 
-					var postsSynced = await postsMirror.SynchronizeAsync();
-					var pagesSynced = await pagesMirror.SynchronizeAsync();
-				}
-
-				//POSTS
-				var deletePosts = db.Posts
-					.Select(p => p.FileLocation)
-					.Select(f => Path.Combine(siteBasePath, f))
-					.Where(f => !File.Exists(f))
-					.ToArray();
-
-				var postsUpdater = new PostUpdater(db);
-				foreach (var file in deletePosts) {
-					postsUpdater.FileDeleted(file);
-				}
-
-				foreach (var file in Directory.EnumerateFiles(postsPath, "*", SearchOption.AllDirectories)) {
-					postsUpdater.FileUpdated(file);
-				}
-
-				//PAGES
-				var deletePages = db.Pages
-					.Select(p => p.FileLocation)
-					.Select(f => Path.Combine(siteBasePath, f))
-					.Where(f => !File.Exists(f))
-					.ToArray();
-
-				var pagesUpdater = new PageUpdater(db);
-				foreach (var file in deletePages) {
-					pagesUpdater.FileDeleted(file);
-				}
-
-				foreach (var file in Directory.EnumerateFiles(pagesPath, "*", SearchOption.AllDirectories)) {
-					pagesUpdater.FileUpdated(file);
-				}
+				await Task.WhenAll(
+					postsMirror.SynchronizeAsync(),
+					pagesMirror.SynchronizeAsync(),
+					imagesMirror.SynchronizeAsync(false)
+				);
 			}
 
+			//POSTS
+			var deletePosts = db.Posts
+				.Select(p => p.FileLocation)
+				.Select(f => Path.Combine(siteBasePath, f))
+				.Where(f => !File.Exists(f))
+				.ToArray();
+
+			var postsUpdater = new PostUpdater(db);
+			foreach (var file in deletePosts) {
+				postsUpdater.FileDeleted(file);
+			}
+
+			foreach (var file in Directory.EnumerateFiles(postsPath, "*", SearchOption.AllDirectories)) {
+				postsUpdater.FileUpdated(file);
+			}
+
+			//PAGES
+			var deletePages = db.Pages
+				.Select(p => p.FileLocation)
+				.Select(f => Path.Combine(siteBasePath, f))
+				.Where(f => !File.Exists(f))
+				.ToArray();
+
+			var pagesUpdater = new PageUpdater(db);
+			foreach (var file in deletePages) {
+				pagesUpdater.FileDeleted(file);
+			}
+
+			foreach (var file in Directory.EnumerateFiles(pagesPath, "*", SearchOption.AllDirectories)) {
+				pagesUpdater.FileUpdated(file);
+			}
+		}
+
+		private dynamic Sitemap()
+		{
 			XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
 			var homepage = new XElement[] { 

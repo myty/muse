@@ -175,9 +175,6 @@
       <DependentUpon>variables.css</DependentUpon>
     </Content>
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="Images\abstract-blurred-lines.jpg" />
-    <Content Include="Images\forest-high-hdr.jpg" />
-    <Content Include="Images\home-bg.jpg" />
     <Content Include="packages.config" />
     <Content Include="Content\clean-blog.less" />
     <Content Include="Content\mixins.less" />
@@ -185,15 +182,11 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\clean-blog.js" />
-    <Content Include="Pages\about.md" />
-    <Content Include="Pages\sample-post.md" />
-    <Content Include="Pages\contact.md" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
-    <Content Include="Posts\2014\2014-11-26-happy-thanksgiving.md" />
     <Content Include="env.config.json" />
     <None Include="Properties\PublishProfiles\FTP.pubxml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />

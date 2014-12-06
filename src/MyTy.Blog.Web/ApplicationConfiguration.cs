@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Hosting;
 using Nancy;
@@ -13,12 +14,14 @@ namespace MyTy.Blog.Web
 	{
 		bool CanRefresh(Request request);
 		string BaseUrl { get; }
+		string GitHubToken { get; }
 	}
 
 	public class ApplicationConfiguration : IApplicationConfiguration
 	{
-		readonly string[] acceptRefreshIPAddresses;
+		readonly string refreshToken;
 		readonly string baseUrl;
+		readonly string gitHubToken;
 
 		public ApplicationConfiguration()
 		{
@@ -27,27 +30,35 @@ namespace MyTy.Blog.Web
 				var environmentConfig = JsonConvert.DeserializeObject<EnvironmentConfig>(
 					File.ReadAllText(environmentConfigFilePath));
 
-				acceptRefreshIPAddresses = environmentConfig.refreshIPs;
+				refreshToken = environmentConfig.refreshToken;
 				baseUrl = environmentConfig.baseUrl;
+				gitHubToken = environmentConfig.gitHubToken;
 			}
 		}
 
 		public bool CanRefresh(Request request)
 		{
-			return acceptRefreshIPAddresses.Contains(request.UserHostAddress);
+			string apiKey = request.Query["key"];
+
+			return apiKey != null && apiKey.Equals(refreshToken); 
 		}
 
 		public string BaseUrl
 		{
 			get { return baseUrl; }
 		}
-	}
 
+		public string GitHubToken
+		{
+			get { return gitHubToken; }
+		}
+	}
 
 	public class EnvironmentConfig
 	{
-		public string[] refreshIPs { get; set; }
+		public string refreshToken { get; set; }
 		public string baseUrl { get; set; }
+		public string gitHubToken { get; set; }
 	}
 
 }

@@ -28,7 +28,7 @@ namespace MyTy.Blog.Web.Services
 			this.oAuthToken = "token " + oAuthToken;
 		}
 
-		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync()
+		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync(bool okToDeleteFiles = true)
 		{
 			var result = new GitHubMirrorSynchronizeResult();
 
@@ -57,7 +57,7 @@ namespace MyTy.Blog.Web.Services
 					var getBlobTask = gitHubApi.GetBlob(gitHubOwner, gitHubRepo, f.sha, oAuthToken);
 
 					var status = "";
-					var localPath = localDir + "\\" + f.path.Replace("/", "\\");
+					var localFileInfo = new System.IO.FileInfo(localDir + "\\" + f.path.Replace("/", "\\"));
 
 					var blob = await getBlobTask;
 
@@ -65,16 +65,18 @@ namespace MyTy.Blog.Web.Services
 						Encoding.UTF8.GetString(Convert.FromBase64String(blob.content)) :
 						blob.content;
 
-					if (!File.Exists(localPath)) {
+
+					if (!localFileInfo.Exists) {
 						status = "added";
-						File.WriteAllText(localPath, fileContents);
-					} else if (!File.ReadAllText(localPath).Equals(fileContents)) {
+						localFileInfo.Directory.Create();
+						File.WriteAllText(localFileInfo.FullName, fileContents);
+					} else if (!File.ReadAllText(localFileInfo.FullName).Equals(fileContents)) {
 						status = "updated";
-						File.WriteAllText(localPath, fileContents);
+						File.WriteAllText(localFileInfo.FullName, fileContents);
 					}
 
 					return new {
-						localPath,
+						localPath = localFileInfo.FullName,
 						status
 					};
 				}))).ToArray();
@@ -93,7 +95,7 @@ namespace MyTy.Blog.Web.Services
 					.EnumerateFiles(localDir, "*", SearchOption.AllDirectories)
 					.Where(f => !remoteFilesSynced.Any(s => s.localPath == f))
 					.Select(f => {
-						File.Delete(f);
+						if (okToDeleteFiles) { File.Delete(f); }
 						return f;
 					})
 					.ToArray();

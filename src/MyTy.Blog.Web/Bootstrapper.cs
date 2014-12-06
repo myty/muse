@@ -35,7 +35,7 @@ namespace MyTy.Blog.Web
 				StaticContentConventionBuilder.AddDirectory("/scripts"));
 
 			conventions.StaticContentsConventions.Add(
-				StaticContentConventionBuilder.AddDirectory("/img", "/Images"));
+				StaticContentConventionBuilder.AddDirectory("/img", "/App_Data/Content/Images"));
 		}
 
 		protected override void ConfigureApplicationContainer(IKernel existingContainer)
