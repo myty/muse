@@ -7,25 +7,21 @@ using System.Threading.Tasks;
 using System.Web;
 using MyTy.Blog.Web.Models;
 using MyTy.Blog.Web.Models.Github;
-using Refit;
+using RestSharp;
 
 namespace MyTy.Blog.Web.Services
 {
 	public class GitHubMirror
 	{
-		readonly string gitHubOwner;
-		readonly string gitHubRepo;
 		readonly string gitHubBaseDir;
-		readonly string localDir;
-		readonly string oAuthToken;
+		readonly string localDir;		
+		readonly GitHubAPI gitHubAPI;
 
 		public GitHubMirror(string gitHubOwner, string gitHubRepo, string gitHubBaseDir, string localDir, string oAuthToken)
 		{
-			this.gitHubOwner = gitHubOwner;
-			this.gitHubRepo = gitHubRepo;
 			this.gitHubBaseDir = gitHubBaseDir;
 			this.localDir = localDir;
-			this.oAuthToken = "token " + oAuthToken;
+			this.gitHubAPI = new GitHubAPI(gitHubOwner, gitHubRepo, "myty-blog-engine", oAuthToken);
 		}
 
 		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync(bool okToDeleteFiles = true)
@@ -33,12 +29,11 @@ namespace MyTy.Blog.Web.Services
 			var result = new GitHubMirrorSynchronizeResult();
 
 			try {
-				var gitHubApi = RestService.For<IGitHubApi>("https://api.github.com");
 
-				var pagesContentResult = await gitHubApi.GetContent(gitHubOwner, gitHubRepo, gitHubBaseDir, oAuthToken);
+				var pagesContentResult = await gitHubAPI.GetContent(gitHubBaseDir);
 
 				var treeContents = await Task.WhenAll(pagesContentResult.Where(p => p.type == "dir").Select(async p => {
-					var treeResults = await gitHubApi.GetTreeRecursively(gitHubOwner, gitHubRepo, p.sha, oAuthToken);
+					var treeResults = await gitHubAPI.GetTreeRecursively(p.sha);
 					return new { 
 						p.path,
 						treeResults 
@@ -54,7 +49,7 @@ namespace MyTy.Blog.Web.Services
 				})));
 
 				var remoteFilesSynced = (await Task.WhenAll(filesPathSha.Select(async f => {
-					var getBlobTask = gitHubApi.GetBlob(gitHubOwner, gitHubRepo, f.sha, oAuthToken);
+					var getBlobTask = gitHubAPI.GetBlob(f.sha);
 
 					var status = "";
 					var localFileInfo = new System.IO.FileInfo(localDir + "\\" + f.path.Replace("/", "\\"));

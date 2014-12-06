@@ -22,7 +22,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>eedc721e</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>d9676aeb</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -104,8 +104,8 @@
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
-    <Reference Include="Refit">
-      <HintPath>..\packages\refit.2.1.0\lib\Net45\Refit.dll</HintPath>
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
@@ -215,7 +215,7 @@
     <Compile Include="Models\BlogDB.cs" />
     <Compile Include="Models\GitHub\Blob.cs" />
     <Compile Include="Models\GitHub\ContentResult.cs" />
-    <Compile Include="Models\GitHub\IGitHubApi.cs" />
+    <Compile Include="Models\GitHub\GitHubAPI.cs" />
     <Compile Include="Models\GitHub\Tree.cs" />
     <Compile Include="Models\GitHub\User.cs" />
     <Compile Include="Models\GitHub\UserSearchResult.cs" />
@@ -225,7 +225,6 @@
     <Compile Include="Modules\PageModule.cs" />
     <Compile Include="Modules\PostModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RefitStubs.cs" />
     <Compile Include="Services\IFileUpdater.cs" />
     <Compile Include="Services\PageScanner.cs" />
     <Compile Include="Services\PageUpdater.cs" />
@@ -278,9 +277,7 @@ xcopy /s /y /R "$(SolutionDir)packages\Nancy.Viewengines.Razor.0.23.2\lib\Net40\
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\refit.2.1.0\build\refit.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\refit.2.1.0\build\refit.targets'))" />
   </Target>
-  <Import Project="..\packages\refit.2.1.0\build\refit.targets" Condition="Exists('..\packages\refit.2.1.0\build\refit.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

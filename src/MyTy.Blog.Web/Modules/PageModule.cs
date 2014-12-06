@@ -9,7 +9,6 @@ using MyTy.Blog.Web.Models.Github;
 using MyTy.Blog.Web.Services;
 using MyTy.Blog.Web.ViewModels;
 using Nancy;
-using Refit;
 
 namespace MyTy.Blog.Web.Modules
 {
