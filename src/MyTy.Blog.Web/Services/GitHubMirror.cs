@@ -57,10 +57,6 @@ namespace MyTy.Blog.Web.Services
 
 					var blob = await getBlobTask;
 
-					//var fileContents = (blob.encoding == "base64") ?
-					//	Encoding.UTF8.GetString(Convert.FromBase64String(blob.content)) :
-					//	blob.content;
-
 					byte[] fileContents = Convert.FromBase64String(blob.content);
 					FileStream fileStream = null;
 
@@ -73,7 +69,6 @@ namespace MyTy.Blog.Web.Services
 							System.IO.FileMode.Create,
 							System.IO.FileAccess.Write);
 
-						// File.WriteAllText(localFileInfo.FullName, fileContents);
 					} else if (!File.ReadAllText(localFileInfo.FullName).Equals(fileContents)) {
 						using (var md5 = MD5.Create()) {
 							fileStream = new System.IO.FileStream(
