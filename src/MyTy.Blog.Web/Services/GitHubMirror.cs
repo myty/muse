@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -51,23 +52,55 @@ namespace MyTy.Blog.Web.Services
 				var remoteFilesSynced = (await Task.WhenAll(filesPathSha.Select(async f => {
 					var getBlobTask = gitHubAPI.GetBlob(f.sha);
 
-					var status = "";
+					string status = null;
 					var localFileInfo = new System.IO.FileInfo(localDir + "\\" + f.path.Replace("/", "\\"));
 
 					var blob = await getBlobTask;
 
-					var fileContents = (blob.encoding == "base64") ?
-						Encoding.UTF8.GetString(Convert.FromBase64String(blob.content)) :
-						blob.content;
+					//var fileContents = (blob.encoding == "base64") ?
+					//	Encoding.UTF8.GetString(Convert.FromBase64String(blob.content)) :
+					//	blob.content;
 
+					byte[] fileContents = Convert.FromBase64String(blob.content);
+					FileStream fileStream = null;
 
 					if (!localFileInfo.Exists) {
 						status = "added";
 						localFileInfo.Directory.Create();
-						File.WriteAllText(localFileInfo.FullName, fileContents);
+
+						fileStream = new System.IO.FileStream(
+							localFileInfo.FullName,
+							System.IO.FileMode.Create,
+							System.IO.FileAccess.Write);
+
+						// File.WriteAllText(localFileInfo.FullName, fileContents);
 					} else if (!File.ReadAllText(localFileInfo.FullName).Equals(fileContents)) {
-						status = "updated";
-						File.WriteAllText(localFileInfo.FullName, fileContents);
+						using (var md5 = MD5.Create()) {
+							fileStream = new System.IO.FileStream(
+								localFileInfo.FullName,
+								System.IO.FileMode.Open,
+								System.IO.FileAccess.ReadWrite);
+
+							var currFileHash = md5.ComputeHash(fileStream);
+							var newFileHash = md5.ComputeHash(fileContents);
+
+							if (currFileHash.Length != newFileHash.Length) {
+								status = "update";
+							} else {
+								for (int i = 0; i < currFileHash.Length; i++) {
+									if (currFileHash[i] != newFileHash[i]) {
+										status = "update";
+										break;
+									}
+								}
+							}
+						}
+					}
+
+					if (status != null && fileStream != null) {
+						fileStream.Position = 0L;
+						fileStream.Write(fileContents, 0, fileContents.Length);
+						fileStream.Close();
 					}
 
 					return new {
