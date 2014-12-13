@@ -15,7 +15,7 @@ namespace MyTy.Blog.Web.Services
 	public class GitHubMirror
 	{
 		readonly string gitHubBaseDir;
-		readonly string localDir;		
+		readonly string localDir;
 		readonly GitHubAPI gitHubAPI;
 
 		public GitHubMirror(string gitHubOwner, string gitHubRepo, string gitHubBaseDir, string localDir, string oAuthToken)
@@ -35,9 +35,9 @@ namespace MyTy.Blog.Web.Services
 
 				var treeContents = await Task.WhenAll(pagesContentResult.Where(p => p.type == "dir").Select(async p => {
 					var treeResults = await gitHubAPI.GetTreeRecursively(p.sha);
-					return new { 
+					return new {
 						p.path,
-						treeResults 
+						treeResults
 					};
 				}));
 
@@ -69,31 +69,25 @@ namespace MyTy.Blog.Web.Services
 							System.IO.FileMode.Create,
 							System.IO.FileAccess.Write);
 
-					} else if (!File.ReadAllText(localFileInfo.FullName).Equals(fileContents)) {
+					} else {
 						using (var md5 = MD5.Create()) {
 							fileStream = new System.IO.FileStream(
 								localFileInfo.FullName,
 								System.IO.FileMode.Open,
-								System.IO.FileAccess.ReadWrite);
+								System.IO.FileAccess.Read);
 
-							var currFileHash = md5.ComputeHash(fileStream);
-							var newFileHash = md5.ComputeHash(fileContents);
-
-							if (currFileHash.Length != newFileHash.Length) {
+							if (!SameContents(fileStream, fileContents)) {
+                                fileStream.Close();
+                                fileStream = new System.IO.FileStream(
+                                    localFileInfo.FullName,
+                                    System.IO.FileMode.Truncate,
+                                    System.IO.FileAccess.Write);
 								status = "update";
-							} else {
-								for (int i = 0; i < currFileHash.Length; i++) {
-									if (currFileHash[i] != newFileHash[i]) {
-										status = "update";
-										break;
-									}
-								}
 							}
 						}
 					}
 
 					if (status != null && fileStream != null) {
-						fileStream.Position = 0L;
 						fileStream.Write(fileContents, 0, fileContents.Length);
 						fileStream.Close();
 					}
@@ -129,16 +123,43 @@ namespace MyTy.Blog.Web.Services
 
 			return result;
 		}
+
+		public static bool SameContents(Stream oldFileContents, byte[] newFileContents)
+		{
+			var result = true;
+            var bufferSize = 16 * 1024;
+            var oldFileBuffer = new byte[bufferSize];
+
+			int oldBufferReadSize;
+            int repeatCount = 0;
+			while ((oldBufferReadSize = oldFileContents.Read(oldFileBuffer, 0, oldFileBuffer.Length)) > 0) {
+                var newFileBuffer = newFileContents
+                    .Skip(bufferSize * repeatCount++)
+                    .Take(oldBufferReadSize)
+                    .ToArray();
+
+                var sameContents = Enumerable.SequenceEqual(
+                    oldFileBuffer.Take(oldBufferReadSize),
+                    newFileBuffer);
+
+                if (!sameContents) {
+                    result = false;
+                    break;
+                }
+			}
+
+            return result;
+		}
 	}
 
 	public class GitHubMirrorSynchronizeResult
 	{
 		public GitHubMirrorSynchronizeResult()
-		{			
+		{
 			FilesUpdated = Enumerable.Empty<string>();
 			FilesAdded = Enumerable.Empty<string>();
 			FilesDeleted = Enumerable.Empty<string>();
-		} 
+		}
 
 		public IEnumerable<string> FilesAdded { get; set; }
 		public IEnumerable<string> FilesUpdated { get; set; }
