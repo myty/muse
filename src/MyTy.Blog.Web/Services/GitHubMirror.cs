@@ -18,11 +18,11 @@ namespace MyTy.Blog.Web.Services
 		readonly string localDir;
 		readonly GitHubAPI gitHubAPI;
 
-		public GitHubMirror(string gitHubOwner, string gitHubRepo, string gitHubBaseDir, string localDir, string oAuthToken)
+		public GitHubMirror(string gitHubOwner, string gitHubRepo, string gitHubBranch, string gitHubBaseDir, string localDir, string oAuthToken)
 		{
 			this.gitHubBaseDir = gitHubBaseDir;
 			this.localDir = localDir;
-			this.gitHubAPI = new GitHubAPI(gitHubOwner, gitHubRepo, "myty-blog-engine", oAuthToken);
+			this.gitHubAPI = new GitHubAPI(gitHubOwner, gitHubRepo, gitHubBranch, "myty-blog-engine", oAuthToken);
 		}
 
 		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync(bool okToDeleteFiles = true)
@@ -124,7 +124,7 @@ namespace MyTy.Blog.Web.Services
 			return result;
 		}
 
-		public static bool SameContents(Stream oldFileContents, byte[] newFileContents)
+		private static bool SameContents(Stream oldFileContents, byte[] newFileContents)
 		{
 			var result = true;
             var bufferSize = 16 * 1024;

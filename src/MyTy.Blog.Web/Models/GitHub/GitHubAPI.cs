@@ -29,12 +29,14 @@ namespace MyTy.Blog.Web.Models.Github
 	{
 		readonly string owner;
 		readonly string repo;
+        readonly string branch;
 		readonly RestClient gitHubClient;
 
-		public GitHubAPI(string owner, string repo, string userAgent, string oAuthToken)
+		public GitHubAPI(string owner, string repo, string branch, string userAgent, string oAuthToken)
 		{
 			this.owner = owner;
 			this.repo = repo;
+            this.branch = branch;
 			this.gitHubClient = new RestClient("https://api.github.com");
 			this.gitHubClient.AddDefaultHeader("User-Agent", userAgent);
 
@@ -56,6 +58,10 @@ namespace MyTy.Blog.Web.Models.Github
 				.AddUrlSegment("owner", owner)
 				.AddUrlSegment("repo", repo)
 				.AddUrlSegment("path", path);
+
+            if (!String.IsNullOrWhiteSpace(branch) && branch != "master") {
+                request.AddQueryParameter("ref", branch);
+            }
 
 			var handle = gitHubClient.ExecuteAsync(request, response => {
 				var responseObj = JsonConvert.DeserializeObject<ContentResult[]>(response.Content);
