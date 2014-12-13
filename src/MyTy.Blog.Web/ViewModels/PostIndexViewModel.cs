@@ -8,6 +8,7 @@ namespace MyTy.Blog.Web.ViewModels
 {
 	public class PostIndexViewModel
 	{
+        public string DisqusShortName { get; set; }
 		public int Page { get; set; }
 		public IEnumerable<Post> Posts { get; set; }
 	}

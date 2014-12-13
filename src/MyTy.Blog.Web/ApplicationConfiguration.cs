@@ -15,6 +15,7 @@ namespace MyTy.Blog.Web
         bool CanRefresh(Request request);
         string BaseUrl { get; }
         string GitHubToken { get; }
+        string DisqusShortName { get; }
         GitHubDirectorySync PagesSync { get; }
         GitHubDirectorySync PostsSync { get; }
         GitHubDirectorySync[] OthersSync { get; }
@@ -25,6 +26,7 @@ namespace MyTy.Blog.Web
         readonly string refreshToken;
         readonly string baseUrl;
         readonly string gitHubToken;
+        readonly string disqusShortName;
         readonly GitHubDirectorySync pagesSync;
         readonly GitHubDirectorySync postsSync;
         readonly GitHubDirectorySync[] othersSync;
@@ -41,6 +43,8 @@ namespace MyTy.Blog.Web
                 if (environmentConfig.othersSync != null) {
                     othersSync = environmentConfig.othersSync.Select(ResolvePaths).ToArray();
                 }
+
+                disqusShortName = environmentConfig.disqus_shortname;
                 refreshToken = environmentConfig.refreshToken;
                 baseUrl = environmentConfig.baseUrl;
                 gitHubToken = environmentConfig.gitHubToken;
@@ -64,6 +68,11 @@ namespace MyTy.Blog.Web
             get { return gitHubToken; }
         }
 
+        public string DisqusShortName
+        {
+            get { return disqusShortName; }
+        }
+
         public GitHubDirectorySync PagesSync { get { return pagesSync; } }
         public GitHubDirectorySync PostsSync { get { return postsSync; } }
         public GitHubDirectorySync[] OthersSync { get { return othersSync; } }
@@ -82,6 +91,8 @@ namespace MyTy.Blog.Web
         public string refreshToken { get; set; }
         public string baseUrl { get; set; }
         public string gitHubToken { get; set; }
+        public string disqus_shortname { get; set; }
+
         public GitHubDirectorySync pagesSync { get; set; }
         public GitHubDirectorySync postsSync { get; set; }
         public GitHubDirectorySync[] othersSync { get; set; }

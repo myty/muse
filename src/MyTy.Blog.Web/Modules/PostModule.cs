@@ -10,12 +10,13 @@ namespace MyTy.Blog.Web.Modules
 {
 	public class PostModule : NancyModule
 	{
-		public PostModule(BlogDB db)
+        public PostModule(BlogDB db, IApplicationConfiguration config)
 		{
 			Get["/"] = parameters => {
 				ViewBag.Title = "Blog Title Goes Here";
-				
+
 				return View["Home", new PostIndexViewModel {
+                    DisqusShortName = config.DisqusShortName,
 					Page = 1,
 					Posts = db.Posts.OrderByDescending(p => p.Date).ToArray()
 				}];
@@ -31,7 +32,8 @@ namespace MyTy.Blog.Web.Modules
 					return Response.AsError(HttpStatusCode.NotFound);
 				}
 
-				return View[post.Layout, new PostDetailViewModel {
+                return View[post.Layout, new PostDetailViewModel {
+                    DisqusShortName = config.DisqusShortName,
 					Post = post
 				}];
 			};
