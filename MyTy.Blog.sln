@@ -8,13 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{545128A7-664C-4452-9413-882CC90E5C1A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F88CCAEA-5030-40A6-B1FF-B5F3663095C8}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
+		build.cmd = build.cmd
+		build.fsx = build.fsx
 	EndProjectSection
 EndProject
 Global

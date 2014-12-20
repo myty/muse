@@ -10,15 +10,24 @@ namespace MyTy.Blog.Web.Modules
 {
 	public class PostModule : NancyModule
 	{
+        const int MAX_POSTS_PER_PAGE = 10;
+
         public PostModule(BlogDB db, IApplicationConfiguration config)
 		{
 			Get["/"] = parameters => {
 				ViewBag.Title = "Blog Title Goes Here";
 
+                var page = (int)Request.Query["page"];
+                page = (page <= 1) ? 0 : (page - 1);
+
 				return View["Home", new PostIndexViewModel {
                     DisqusShortName = config.DisqusShortName,
-					Page = 1,
-					Posts = db.Posts.OrderByDescending(p => p.Date).ToArray()
+                    Page = page + 1,
+					Posts = db.Posts
+                        .OrderByDescending(p => p.Date)
+                        .Skip(MAX_POSTS_PER_PAGE * page)
+                        .Take(MAX_POSTS_PER_PAGE)
+                        .ToArray()
 				}];
 			};
 
