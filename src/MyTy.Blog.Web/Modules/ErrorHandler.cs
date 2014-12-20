@@ -29,7 +29,7 @@ namespace MyTy.Blog.Web.Modules
 
 		public bool HandlesStatusCode(Nancy.HttpStatusCode statusCode, Nancy.NancyContext context)
 		{
-			return (int)statusCode >= 300;
+			return (int)statusCode >= 400;
 		}
 	}
 

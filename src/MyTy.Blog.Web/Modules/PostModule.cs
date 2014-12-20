@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using MyTy.Blog.Web.Models;
 using MyTy.Blog.Web.ViewModels;
 using Nancy;
+using Nancy.Responses;
 
 namespace MyTy.Blog.Web.Modules
 {
@@ -29,15 +31,15 @@ namespace MyTy.Blog.Web.Modules
                     .ToArray();
 
                 if (!posts.Any()) {
-                    Response.AsRedirect("/");
+                    return Response.AsRedirect("~/");
+                } else {
+                    return View["Home", new PostIndexViewModel {
+                        DisqusShortName = config.DisqusShortName,
+                        Page = page + 1,
+                        TotalPageCount = Convert.ToInt32(Math.Ceiling((double)allPosts.Count() / (double)MAX_POSTS_PER_PAGE)),
+                        Posts = posts
+                    }];
                 }
-
-                return View["Home", new PostIndexViewModel {
-                    DisqusShortName = config.DisqusShortName,
-                    Page = page + 1,
-                    TotalPageCount = Convert.ToInt32(Math.Ceiling((double)allPosts.Count() / (double)MAX_POSTS_PER_PAGE)),
-                    Posts = posts
-                }];
             };
 
             Get["/{year}/{month}/{day}/{slug}"] = parameters => {

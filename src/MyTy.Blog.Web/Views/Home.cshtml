@@ -39,14 +39,24 @@
         </div>
         <hr>
       }
+
       <!-- Pager -->
-      @if ((Model.TotalPageCount - Model.Page) > 0) {
-        <ul class="pager">
-          <li class="next">
-            <a href="#">Older Posts &rarr;</a>
+      <ul class="pager">
+
+        @if (Model.Page > 1) {
+          <li class="previous">
+            <a href="?page=@(Model.Page - 1)">&larr; Newer Posts</a>
           </li>
-        </ul>
-      }
+        }
+
+        @if ((Model.TotalPageCount - Model.Page) > 0) {
+          <li class="next">
+            <a href="?page=@(Model.Page + 1)">Older Posts &rarr;</a>
+          </li>
+        }
+
+      </ul>
+
     </div>
   </div>
 </div>
