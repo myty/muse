@@ -2,62 +2,64 @@
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<MyTy.Blog.Web.ViewModels.PostIndexViewModel>
 
 @{
-	Layout = "Views/_Layout.cshtml";
+  Layout = "Views/_Layout.cshtml";
 }
 
 <!-- Page Header -->
 <!-- Set your background image for this header on the line below. -->
 <header class="intro-header" style="background-image: url('img/abstract-blurred-lines.jpg')">
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-				<div class="site-heading">
-					<h1>Clean Blog</h1>
-					<hr class="small">
-					<span class="subheading">A Clean Blog Theme by Start Bootstrap</span>
-				</div>
-			</div>
-		</div>
-	</div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="site-heading">
+          <h1>Clean Blog</h1>
+          <hr class="small">
+          <span class="subheading">A Clean Blog Theme by Start Bootstrap</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <!-- Main Content -->
 <div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			@foreach (var post in Model.Posts) {
-				<div class="post-preview">
-					<a href="@post.Href">
-						<h2 class="post-title">
-							@post.Title
-						</h2>
-						<h3 class="post-subtitle">
-							@post.SubTitle
-						</h3>
-					</a>
-					<p class="post-meta">Posted on @post.Date.ToString("D") <a href="@post.Href#disqus_thread" data-disqus-identifier="@post.Href">Comments</a></p>
-				</div>
-				<hr>
-			}
-			<!-- Pager -->
-			<ul class="pager">
-				<li class="next">
-					<a href="#">Older Posts &rarr;</a>
-				</li>
-			</ul>
-		</div>
-	</div>
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      @foreach (var post in Model.Posts) {
+        <div class="post-preview">
+          <a href="@post.Href">
+            <h2 class="post-title">
+              @post.Title
+            </h2>
+            <h3 class="post-subtitle">
+              @post.SubTitle
+            </h3>
+          </a>
+          <p class="post-meta">Posted on @post.Date.ToString("D") <a href="@post.Href#disqus_thread" data-disqus-identifier="@post.Href">Comments</a></p>
+        </div>
+        <hr>
+      }
+      <!-- Pager -->
+      @if ((Model.TotalPageCount - Model.Page) > 0) {
+        <ul class="pager">
+          <li class="next">
+            <a href="#">Older Posts &rarr;</a>
+          </li>
+        </ul>
+      }
+    </div>
+  </div>
 </div>
 
 <script type="text/javascript">
-	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-	var disqus_shortname = '@Model.DisqusShortName'; // required: replace example with your forum shortname
+  /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  var disqus_shortname = '@Model.DisqusShortName'; // required: replace example with your forum shortname
 
-	/* * * DON'T EDIT BELOW THIS LINE * * */
-	(function () {
-		var s = document.createElement('script'); s.async = true;
-		s.type = 'text/javascript';
-		s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-		(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-	}());
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+  }());
 </script>

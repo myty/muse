@@ -10,6 +10,7 @@ namespace MyTy.Blog.Web.ViewModels
 	{
         public string DisqusShortName { get; set; }
 		public int Page { get; set; }
+        public int TotalPageCount { get; set; }
 		public IEnumerable<Post> Posts { get; set; }
 	}
 }
