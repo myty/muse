@@ -1,23 +1,26 @@
- EditorConfig is awesome:
+EditorConfig is awesome:
 http://EditorConfig.org
 
 # top-most EditorConfig file
 root = true
+charset = utf-8
 
-# Default settings:
-# A newline ending every file
-# Use 2 spaces as indentation
-# Trim trailing whitespace
 [*]
-insert_final_newline = true
-indent_style = space
-indent_size = 2
+end_of_line = crlf
+insert_final_newline = false
 trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
 
 [*.cs]
 indent_size = 4
 
 [*.csproj]
+indent_size = 2
+
+# 2 space indentation
+[*.js]
+indent_style = space
 indent_size = 2
 
 [*.nuspec]
