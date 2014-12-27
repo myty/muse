@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using MyTy.Blog.Web.Models;
+using MyTy.Blog.Web.Services;
 using MyTy.Blog.Web.ViewModels;
 using Nancy;
 using Nancy.Responses;
@@ -24,6 +25,10 @@ namespace MyTy.Blog.Web.Modules
 
                 var allPosts = db.Posts
                     .OrderByDescending(p => p.Date);
+
+                if (!allPosts.Any()) {
+                    return Response.AsError(HttpStatusCode.InternalServerError);
+                }
 
                 var posts = allPosts
                     .Skip(MAX_POSTS_PER_PAGE * page)

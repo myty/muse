@@ -25,6 +25,11 @@ namespace MyTy.Blog.Web.Services
 			this.gitHubAPI = new GitHubAPI(gitHubOwner, gitHubRepo, gitHubBranch, "myty-blog-engine", oAuthToken);
 		}
 
+        public static GitHubMirror Create(GitHubDirectorySync dirSync, string gitHubToken)
+        {
+            return new GitHubMirror(dirSync.owner, dirSync.repo, dirSync.branch, dirSync.remotePath, dirSync.locaPath, gitHubToken);
+        }
+
 		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync(bool okToDeleteFiles = true)
 		{
 			var result = new GitHubMirrorSynchronizeResult();

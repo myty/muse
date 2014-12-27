@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Hosting;
 using Biggy;
-using Biggy.JSON;
+using Biggy.Core;
+using Biggy.Data.Json;
 
 namespace MyTy.Blog.Web.Models
 {
@@ -15,12 +16,16 @@ namespace MyTy.Blog.Web.Models
 
 		public BlogDB()
 		{
-			var app_data = HostingEnvironment.MapPath("~/App_Data/");
+			var app_data = HostingEnvironment.MapPath("~/App_Data/DB");
 
-			Posts = new BiggyList<Post>(new JsonStore<Post>(dbPath: app_data));
+            var dbCore = new JsonDbCore(app_data, "v2");
 
-			Pages = new BiggyList<Page>(new JsonStore<Page>(dbPath: app_data)); 
-		}  
+            var pageStore = new JsonStore<Page>(dbCore);
+            var postStore = new JsonStore<Post>(dbCore);
+
+            Posts = new BiggyList<Post>(postStore);
+            Pages = new BiggyList<Page>(pageStore);
+		}
 
 	}
 }

@@ -28,6 +28,10 @@ namespace MyTy.Blog.Web.Modules
                     return Sitemap();
                 }
 
+                if (!db.Pages.Any()) {
+                    return Response.AsError(HttpStatusCode.InternalServerError);
+                }
+
                 var fileLocation = String.Format("App_Data\\Content\\Pages\\{0}.md", parameters.slug);
 
                 var page = db.Pages.FirstOrDefault(p => p.FileLocation == fileLocation);
@@ -54,15 +58,10 @@ namespace MyTy.Blog.Web.Modules
             };
         }
 
-        private GitHubMirror CreateGitHubMirror(GitHubDirectorySync dirSync, string gitHubToken)
-        {
-            return new GitHubMirror(dirSync.owner, dirSync.repo, dirSync.branch, dirSync.remotePath, dirSync.locaPath, gitHubToken);
-        }
-
         private async Task GetLatestContent()
         {
             if (!String.IsNullOrWhiteSpace(config.GitHubToken)) {
-                var updatePostsTask = (config.PostsSync == null) ? Task.Delay(0) : CreateGitHubMirror(config.PostsSync, config.GitHubToken)
+                var updatePostsTask = (config.PostsSync == null) ? Task.Delay(0) : GitHubMirror.Create(config.PostsSync, config.GitHubToken)
                     .SynchronizeAsync().ContinueWith(t => {
                         var deletePosts = db.Posts
                             .Select(p => p.FileLocation)
@@ -80,7 +79,7 @@ namespace MyTy.Blog.Web.Modules
                         }
                     });
 
-                var updatePagesTask = (config.PostsSync == null) ? Task.Delay(0) : CreateGitHubMirror(config.PagesSync, config.GitHubToken)
+                var updatePagesTask = (config.PostsSync == null) ? Task.Delay(0) : GitHubMirror.Create(config.PagesSync, config.GitHubToken)
                     .SynchronizeAsync().ContinueWith(t => {
                         var deletePages = db.Pages
                             .Select(p => p.FileLocation)
@@ -100,7 +99,7 @@ namespace MyTy.Blog.Web.Modules
 
                 var updateOtherDirsTask = (config.OthersSync == null) ? Task.Delay(0) : Task.WhenAll(
                     config.OthersSync.Select(o =>
-                        CreateGitHubMirror(o, config.GitHubToken).SynchronizeAsync(false)));
+                        GitHubMirror.Create(o, config.GitHubToken).SynchronizeAsync(false)));
 
                 await Task.WhenAll(
                     updatePostsTask,

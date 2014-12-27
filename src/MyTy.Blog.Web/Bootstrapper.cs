@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Optimization;
@@ -72,6 +73,23 @@ namespace MyTy.Blog.Web
 			BundleTable.Bundles.Add(styleBundle);
 
 			BundleTable.EnableOptimizations = false;
+
+            var db = container.Get<BlogDB>();
+            var appConfig = container.Get<IApplicationConfiguration>();
+
+            if (!db.Pages.Any()) {
+                var pagesUpdater = new PageUpdater(db);
+                foreach (var file in Directory.EnumerateFiles(appConfig.PagesSync.locaPath, "*", SearchOption.AllDirectories)) {
+                    pagesUpdater.FileUpdated(file);
+                }
+            }
+
+            if (!db.Posts.Any()) {
+                var postsUpdater = new PostUpdater(db);
+                foreach (var file in Directory.EnumerateFiles(appConfig.PostsSync.locaPath, "*", SearchOption.AllDirectories)) {
+                    postsUpdater.FileUpdated(file);
+                }
+            }
 
 			base.ApplicationStartup(container, pipelines);
 		}
