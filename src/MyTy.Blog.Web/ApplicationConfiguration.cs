@@ -16,6 +16,7 @@ namespace MyTy.Blog.Web
         string BaseUrl { get; }
         string GitHubToken { get; }
         string DisqusShortName { get; }
+        string SiteTitle { get; }
         GitHubDirectorySync PagesSync { get; }
         GitHubDirectorySync PostsSync { get; }
         GitHubDirectorySync[] OthersSync { get; }
@@ -72,6 +73,9 @@ namespace MyTy.Blog.Web
         {
             get { return disqusShortName; }
         }
+
+        private string siteTitle = "Easily Amused";
+        public string SiteTitle { get { return siteTitle; } }
 
         public GitHubDirectorySync PagesSync { get { return pagesSync; } }
         public GitHubDirectorySync PostsSync { get { return postsSync; } }

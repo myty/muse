@@ -40,6 +40,8 @@ namespace MyTy.Blog.Web.Modules
                     return Response.AsError(HttpStatusCode.NotFound);
                 }
 
+                ViewBag.PageTitle = " - " + page.Title;
+
                 return View[page.Layout, new PageDetailViewModel {
                     Page = page
                 }];

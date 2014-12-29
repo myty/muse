@@ -1017,8 +1017,10 @@ jQuery(document).ready(function ($) {
         //is scrolling up...
         if (currentTop > 0 && $('.navbar-custom').hasClass('is-fixed')) {
           $('.navbar-custom').addClass('is-visible');
+          $('.pagetitle__heading').removeClass('hidden');
         } else {
           $('.navbar-custom').removeClass('is-visible is-fixed');
+          $('.pagetitle__heading').addClass('hidden');
         }
         previousAction = ACTION_UP;
       } else {

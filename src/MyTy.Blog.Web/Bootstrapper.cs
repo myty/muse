@@ -55,7 +55,10 @@ namespace MyTy.Blog.Web
 
 		protected override void ConfigureRequestContainer(IKernel container, NancyContext context)
 		{
-			base.ConfigureRequestContainer(container, context);
+            base.ConfigureRequestContainer(container, context);
+
+            var appConfig = container.Get<IApplicationConfiguration>();
+            context.ViewBag.Title = appConfig.SiteTitle;
 		}
 
 		protected override void ApplicationStartup(IKernel container, IPipelines pipelines)

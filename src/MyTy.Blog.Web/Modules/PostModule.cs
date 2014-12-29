@@ -18,8 +18,6 @@ namespace MyTy.Blog.Web.Modules
         public PostModule(BlogDB db, IApplicationConfiguration config)
         {
             Get["/"] = parameters => {
-                ViewBag.Title = "Blog Title Goes Here";
-
                 var page = Int32.Parse((string)Request.Query["page"] ?? "1");
                 page = (page <= 1) ? 0 : (page - 1);
 
@@ -56,6 +54,8 @@ namespace MyTy.Blog.Web.Modules
                 if (post == null) {
                     return Response.AsError(HttpStatusCode.NotFound);
                 }
+
+                ViewBag.PageTitle = " - " + post.Title;
 
                 return View[post.Layout, new PostDetailViewModel {
                     DisqusShortName = config.DisqusShortName,

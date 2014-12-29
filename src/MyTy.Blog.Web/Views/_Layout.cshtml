@@ -14,12 +14,12 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<title>@ViewBag.Title</title>
+	<title>@ViewBag.Title@ViewBag.PageTitle</title>
 
 	@Html.Raw(Styles.Render("~/css-base").ToString())
 
 	<!-- Custom Fonts -->
-	<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	<link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
 
@@ -43,7 +43,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="/">Start Bootstrap</a>
+				<span class="navbar-brand">@ViewBag.Title<span class="pagetitle__heading hidden">@ViewBag.PageTitle</span></span>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
