@@ -59,6 +59,19 @@ namespace MyTy.Blog.Web
 
             var appConfig = container.Get<IApplicationConfiguration>();
             context.ViewBag.Title = appConfig.SiteTitle;
+
+            var db = container.Get<BlogDB>();
+            var siteMenu = new Dictionary<string, string>();
+            siteMenu.Add("Home", "/");
+            foreach (var menuItem in db.Pages
+                .Where(p => !String.IsNullOrWhiteSpace(p.SiteMenu))
+                .OrderBy(p => p.SiteMenuOrder)) {
+                siteMenu.Add(menuItem.SiteMenu, "/" + menuItem.FileLocation
+                    .Replace("App_Data\\Content\\Pages\\", "")
+                    .Replace(".md", ""));
+            }
+
+            context.ViewBag.SiteMenu = siteMenu;
 		}
 
 		protected override void ApplicationStartup(IKernel container, IPipelines pipelines)
@@ -69,8 +82,9 @@ namespace MyTy.Blog.Web
 				.Include("~/Scripts/clean-blog.js");
 
 			var styleBundle = new StyleBundle("~/css-base")
-				.Include("~/Content/bootstrap.css")
-				.Include("~/Content/clean-blog.css");
+                .Include("~/Content/bootstrap.css")
+                .Include("~/Content/clean-blog.css")
+                .Include("~/Content/site.css");
 
 			BundleTable.Bundles.Add(scriptBundle);
 			BundleTable.Bundles.Add(styleBundle);

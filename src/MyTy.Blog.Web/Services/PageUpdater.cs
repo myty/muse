@@ -43,7 +43,15 @@ namespace MyTy.Blog.Web.Services
 
 			var pageDate = (metadata.ContainsKey("date") && metadata["date"] != null && (string)metadata["date"] != "nil") ?
 				DateTime.Parse((string)metadata["date"]) :
-				DateTime.MaxValue;
+                DateTime.MaxValue;
+
+            var siteMenu = (metadata.ContainsKey("siteMenu") && metadata["siteMenu"] != null && (string)metadata["siteMenu"] != "nil") ?
+                metadata["siteMenu"] as string :
+                null;
+
+            var siteMenuOrder = 0;
+            if (metadata.ContainsKey("siteMenuOrder") && metadata["siteMenuOrder"] != null && (string)metadata["siteMenuOrder"] != "nil" &&
+                Int32.TryParse((string)metadata["siteMenuOrder"], out siteMenuOrder)) { }
 
 			var title = metadata["title"] as string;
 
@@ -61,7 +69,9 @@ namespace MyTy.Blog.Web.Services
 					HeaderBackgroundImage = headerBg,
 					FileLocation = fileLocation,
 					Date = pageDate,
-					Layout = layout
+					Layout = layout,
+                    SiteMenu = siteMenu,
+                    SiteMenuOrder = siteMenuOrder
 
 				});
 			} else {
@@ -91,11 +101,19 @@ namespace MyTy.Blog.Web.Services
 
 				if (page.SubTitle != subTitle) {
 					page.SubTitle = subTitle;
-				}
+                }
 
-				if (page.Layout != layout) {
-					page.Layout = layout;
-				}
+                if (page.Layout != layout) {
+                    page.Layout = layout;
+                }
+
+                if (page.SiteMenu != siteMenu) {
+                    page.SiteMenu = siteMenu;
+                }
+
+                if (page.SiteMenuOrder != siteMenuOrder) {
+                    page.SiteMenuOrder = siteMenuOrder;
+                }
 
 				db.Pages.Update(page);
 			}

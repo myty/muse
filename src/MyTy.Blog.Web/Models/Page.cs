@@ -14,6 +14,8 @@ namespace MyTy.Blog.Web.Models
 		public string HeaderBackgroundImage { get; set; }
 		public DateTime Date { get; set; }
 		public string Content { get; set; }
-		public string Layout { get; set; }
+        public string Layout { get; set; }
+        public string SiteMenu { get; set; }
+        public int? SiteMenuOrder { get; set; }
 	}
 }

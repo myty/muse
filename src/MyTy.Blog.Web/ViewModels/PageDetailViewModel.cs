@@ -8,6 +8,7 @@ namespace MyTy.Blog.Web.ViewModels
 {
 	public class PageDetailViewModel
 	{
-		public Page Page { get; set; }
+        public Page Page { get; set; }
+        public string EditLink { get; set; }
 	}
 }

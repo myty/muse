@@ -12,7 +12,7 @@ using Nancy;
 
 namespace MyTy.Blog.Web.Modules
 {
-    public class PageModule : NancyModule
+    public class PageModule : BaseModule
     {
         readonly string siteBasePath = HostingEnvironment.MapPath(@"~/");
         readonly BlogDB db;
@@ -43,7 +43,8 @@ namespace MyTy.Blog.Web.Modules
                 ViewBag.PageTitle = " - " + page.Title;
 
                 return View[page.Layout, new PageDetailViewModel {
-                    Page = page
+                    Page = page,
+                    EditLink = GetEditLink(config.PagesSync, parameters.slug + ".md")
                 }];
             };
 

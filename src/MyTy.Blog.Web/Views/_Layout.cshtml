@@ -1,4 +1,5 @@
 ﻿@using System.Web.Optimization
+@using System.Collections.Generic
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
 @{
 	Layout = null;
@@ -48,20 +49,14 @@
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-				<ul class="nav navbar-nav navbar-right">
-					<li>
-						<a href="/">Home</a>
-					</li>
-					<li>
-						<a href="/about">About</a>
-					</li>
-					<li>
-						<a href="/sample-post">Sample Post</a>
-					</li>
-					<li>
-						<a href="/contact">Contact</a>
-					</li>
-				</ul>
+                <ul class="nav navbar-nav navbar-right">
+                    @foreach (var menuItem in ViewBag.SiteMenu) {
+                        <li>
+                            <a href="@menuItem.Value">@menuItem.Key</a>
+                        </li>
+                    }
+                </ul>
+
 			</div>
 			<!-- /.navbar-collapse -->
 		</div>

@@ -11,7 +11,7 @@ using Nancy.Responses;
 
 namespace MyTy.Blog.Web.Modules
 {
-    public class PostModule : NancyModule
+    public class PostModule : BaseModule
     {
         const int MAX_POSTS_PER_PAGE = 10;
 
@@ -59,6 +59,9 @@ namespace MyTy.Blog.Web.Modules
 
                 return View[post.Layout, new PostDetailViewModel {
                     DisqusShortName = config.DisqusShortName,
+                    EditLink = GetEditLink(config.PostsSync, String.Format(
+                        "{0}/{0}-{1}-{2}-{3}.md",
+                        parameters.year, parameters.month, parameters.day, parameters.slug)),
                     Post = post
                 }];
             };
