@@ -1,0 +1,39 @@
+﻿@using System.Web.Optimization
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Muse.Web.ViewModels.PageDetailViewModel>
+
+@{
+    Layout = "Views/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<!-- Set your background image for this header on the line below. -->
+<header class="intro-header" style="background-image: url('@Model.Page.HeaderBackgroundImage')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>@Model.Page.Title</h1>
+                    <h2 class="subheading">
+                        @Model.Page.SubTitle
+                        <span><a class="edit-link" style="color:#fff; font-size: .5em;" href="@Model.EditLink" target="_blank"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> Edit</a></span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Page Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                @Html.Raw(Model.Page.Content)
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+<hr>

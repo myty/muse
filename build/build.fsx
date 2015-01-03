@@ -6,7 +6,7 @@ RestorePackages()
 
 // Properties
 let artifactDir = "./artifacts/"
-let projName = "MyTy.Blog.Web"
+let projName = "Muse.Web"
 
 // Targets
 Target "Clean" (fun _ ->
@@ -14,7 +14,7 @@ Target "Clean" (fun _ ->
 )
 
 Target "BuildApp" (fun _ ->
-    !! "src/MyTy.Blog.Web/MyTy.Blog.Web.csproj"
+    !! "src/Muse.Web/Muse.Web.csproj"
       |> MSBuildRelease artifactDir "Build"
       |> Log "AppBuild-Output: "
 )
