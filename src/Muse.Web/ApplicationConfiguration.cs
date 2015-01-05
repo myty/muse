@@ -24,32 +24,60 @@ namespace Muse.Web
 
     public class ApplicationConfiguration : IApplicationConfiguration
     {
-        readonly string refreshToken;
-        readonly string baseUrl;
-        readonly string gitHubToken;
-        readonly string disqusShortName;
-        readonly GitHubDirectorySync pagesSync;
-        readonly GitHubDirectorySync postsSync;
-        readonly GitHubDirectorySync[] othersSync;
+        private string refreshToken;
+        private string baseUrl;
+        private string gitHubToken;
+        private string disqusShortName;
+        private GitHubDirectorySync pagesSync;
+        private GitHubDirectorySync postsSync;
+        private GitHubDirectorySync[] othersSync;
+
+        readonly FileSystemWatcher watcher = new FileSystemWatcher();
 
         public ApplicationConfiguration()
         {
             var environmentConfigFilePath = HostingEnvironment.MapPath("~/env.config.json");
             if (File.Exists(environmentConfigFilePath)) {
-                var environmentConfig = JsonConvert.DeserializeObject<EnvironmentConfig>(
-                    File.ReadAllText(environmentConfigFilePath));
-
-                pagesSync = ResolvePaths(environmentConfig.pagesSync);
-                postsSync = ResolvePaths(environmentConfig.postsSync);
-                if (environmentConfig.othersSync != null) {
-                    othersSync = environmentConfig.othersSync.Select(ResolvePaths).ToArray();
-                }
-
-                disqusShortName = environmentConfig.disqus_shortname;
-                refreshToken = environmentConfig.refreshToken;
-                baseUrl = environmentConfig.baseUrl;
-                gitHubToken = environmentConfig.gitHubToken;
+                ScanEnvironmentConfigFile(environmentConfigFilePath);
             }
+
+            watcher.Path = Path.GetDirectoryName(environmentConfigFilePath);
+            watcher.IncludeSubdirectories = false;
+            watcher.NotifyFilter = NotifyFilters.Attributes |
+                NotifyFilters.CreationTime |
+                NotifyFilters.FileName |
+                NotifyFilters.LastAccess |
+                NotifyFilters.LastWrite |
+                NotifyFilters.Size |
+                NotifyFilters.Security;
+            watcher.Filter = Path.GetFileName(environmentConfigFilePath);
+
+            watcher.Changed += (sender, e) => {
+                ScanEnvironmentConfigFile(e.FullPath);
+            };
+
+            watcher.Created += (sender, e) => {
+                ScanEnvironmentConfigFile(e.FullPath);
+            };
+
+            watcher.EnableRaisingEvents = true;
+        }
+
+        private void ScanEnvironmentConfigFile(string environmentConfigFilePath)
+        {
+            var environmentConfig = JsonConvert.DeserializeObject<EnvironmentConfig>(
+                File.ReadAllText(environmentConfigFilePath));
+
+            pagesSync = ResolvePaths(environmentConfig.pagesSync);
+            postsSync = ResolvePaths(environmentConfig.postsSync);
+            if (environmentConfig.othersSync != null) {
+                othersSync = environmentConfig.othersSync.Select(ResolvePaths).ToArray();
+            }
+
+            disqusShortName = environmentConfig.disqus_shortname;
+            refreshToken = environmentConfig.refreshToken;
+            baseUrl = environmentConfig.baseUrl;
+            gitHubToken = environmentConfig.gitHubToken;
         }
 
         public bool CanRefresh(Request request)
