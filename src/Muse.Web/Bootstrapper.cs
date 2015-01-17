@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Optimization;
 using Muse.Web.Models;
 using Muse.Web.Modules;
@@ -19,9 +20,17 @@ namespace Muse.Web
 {
 	public class CustomBoostrapper : NinjectNancyBootstrapper
 	{
+        readonly string siteBasePath = HostingEnvironment.MapPath(@"~/");
+
 		protected override void ConfigureConventions(NancyConventions conventions)
 		{
-			base.ConfigureConventions(conventions);
+            base.ConfigureConventions(conventions);
+
+            conventions.StaticContentsConventions.Add(
+                StaticContentConventionBuilder.AddFile("/atom.xml", Path.Combine(siteBasePath, "App_Data/Content/atom.xml")));
+
+            conventions.StaticContentsConventions.Add(
+                StaticContentConventionBuilder.AddFile("/sitemap.xml", Path.Combine(siteBasePath, "App_Data/Content/sitemap.xml")));
 
 			conventions.StaticContentsConventions.Add(
 				StaticContentConventionBuilder.AddDirectory("/js-base"));
@@ -36,19 +45,24 @@ namespace Muse.Web
 				StaticContentConventionBuilder.AddDirectory("/scripts"));
 
 			conventions.StaticContentsConventions.Add(
-				StaticContentConventionBuilder.AddDirectory("/img", "/App_Data/Content/Images"));
+				StaticContentConventionBuilder.AddDirectory("/img", "/App_Data/Content/_imgs"));
 		}
 
 		protected override void ConfigureApplicationContainer(IKernel existingContainer)
 		{
 			existingContainer
 				.Bind<BlogDB>().ToSelf()
-				.InSingletonScope();
+                .InSingletonScope();
 
-			existingContainer
-				.Bind<IApplicationConfiguration>()
-				.To<ApplicationConfiguration>()
-				.InSingletonScope();
+            existingContainer
+                .Bind<IApplicationConfiguration>()
+                .To<ApplicationConfiguration>()
+                .InSingletonScope();
+
+            existingContainer
+                .Bind<IContentService>()
+                .To<ContentService>()
+                .InSingletonScope();
 
 			base.ConfigureApplicationContainer(existingContainer);
 		}
@@ -59,6 +73,9 @@ namespace Muse.Web
 
             var appConfig = container.Get<IApplicationConfiguration>();
             context.ViewBag.Title = appConfig.SiteTitle;
+            context.ViewBag.SubTitle = appConfig.SiteSubTitle;
+
+            context.ViewBag.DefaultHeaderImage = "/img/" + appConfig.DefaultHeaderImage;
 
             var db = container.Get<BlogDB>();
             var siteMenu = new Dictionary<string, string>();
@@ -66,9 +83,7 @@ namespace Muse.Web
             foreach (var menuItem in db.Pages
                 .Where(p => !String.IsNullOrWhiteSpace(p.SiteMenu))
                 .OrderBy(p => p.SiteMenuOrder)) {
-                siteMenu.Add(menuItem.SiteMenu, "/" + menuItem.FileLocation
-                    .Replace("App_Data\\Content\\Pages\\", "")
-                    .Replace(".md", ""));
+                siteMenu.Add(menuItem.SiteMenu, menuItem.Href);
             }
 
             context.ViewBag.SiteMenu = siteMenu;
@@ -90,23 +105,6 @@ namespace Muse.Web
 			BundleTable.Bundles.Add(styleBundle);
 
 			BundleTable.EnableOptimizations = false;
-
-            var db = container.Get<BlogDB>();
-            var appConfig = container.Get<IApplicationConfiguration>();
-
-            if (!db.Pages.Any()) {
-                var pagesUpdater = new PageUpdater(db);
-                foreach (var file in Directory.EnumerateFiles(appConfig.PagesSync.locaPath, "*", SearchOption.AllDirectories)) {
-                    pagesUpdater.FileUpdated(file);
-                }
-            }
-
-            if (!db.Posts.Any()) {
-                var postsUpdater = new PostUpdater(db);
-                foreach (var file in Directory.EnumerateFiles(appConfig.PostsSync.locaPath, "*", SearchOption.AllDirectories)) {
-                    postsUpdater.FileUpdated(file);
-                }
-            }
 
 			base.ApplicationStartup(container, pipelines);
 		}

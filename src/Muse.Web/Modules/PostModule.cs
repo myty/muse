@@ -46,7 +46,7 @@ namespace Muse.Web.Modules
             };
 
             Get["/{year}/{month}/{day}/{slug}"] = parameters => {
-                var fileLocation = String.Format("App_Data\\Content\\Posts\\{0}\\{0}-{1}-{2}-{3}.md",
+                var fileLocation = String.Format("App_Data\\Content\\_posts\\{0}\\{0}-{1}-{2}-{3}.md",
                     parameters.year, parameters.month, parameters.day, parameters.slug);
 
                 var post = db.Posts.FirstOrDefault(p => p.FileLocation == fileLocation);
@@ -59,7 +59,7 @@ namespace Muse.Web.Modules
 
                 return View[post.Layout, new PostDetailViewModel {
                     DisqusShortName = config.DisqusShortName,
-                    EditLink = GetEditLink(config.PostsSync, String.Format(
+                    EditLink = GetEditLink(config.Sync, "_posts", String.Format(
                         "{0}/{0}-{1}-{2}-{3}.md",
                         parameters.year, parameters.month, parameters.day, parameters.slug)),
                     Post = post

@@ -25,9 +25,10 @@ namespace Muse.Web.Services
 			this.gitHubAPI = new GitHubAPI(gitHubOwner, gitHubRepo, gitHubBranch, "myty-blog-engine", oAuthToken);
 		}
 
-        public static GitHubMirror Create(GitHubDirectorySync dirSync, string gitHubToken)
+        public static GitHubMirror Create(GitHubDirectorySync dirSync, string remoteFolder, string gitHubToken)
         {
-            return new GitHubMirror(dirSync.owner, dirSync.repo, dirSync.branch, dirSync.remotePath, dirSync.locaPath, gitHubToken);
+            return new GitHubMirror(dirSync.owner, dirSync.repo, dirSync.branch, remoteFolder,
+                Path.Combine(dirSync.locaStoragePath, remoteFolder), gitHubToken);
         }
 
 		public async Task<GitHubMirrorSynchronizeResult> SynchronizeAsync(bool okToDeleteFiles = true)

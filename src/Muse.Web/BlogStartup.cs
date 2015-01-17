@@ -14,7 +14,7 @@ namespace Muse.Web
 	{
 		public void Configuration(IAppBuilder app)
 		{
-			app.UseNancy();
+            app.UseNancy();
 			app.UseStageMarker(PipelineStage.MapHandler);
 		}
 	}

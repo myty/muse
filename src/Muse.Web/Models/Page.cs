@@ -17,5 +17,8 @@ namespace Muse.Web.Models
         public string Layout { get; set; }
         public string SiteMenu { get; set; }
         public int? SiteMenuOrder { get; set; }
+
+        public string AuthorName { get; set; }
+        public string AuthorUrl { get; set; }
 	}
 }
