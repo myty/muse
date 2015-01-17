@@ -82,6 +82,7 @@ namespace Muse.Web
             refreshToken = environmentConfig.refreshToken;
             baseUrl = environmentConfig.baseUrl;
             gitHubToken = environmentConfig.gitHubToken;
+            disqusShortName = environmentConfig.disqus_shortname;
 
             var shouldSync = sync.remoteFolders
                 .Select(f => Path.Combine(sync.locaStoragePath, f))
@@ -97,7 +98,6 @@ namespace Muse.Web
             var siteConfig = JsonConvert.DeserializeObject<SiteConfig>(
                 File.ReadAllText(siteConfigFilePath));
 
-            disqusShortName = siteConfig.disqus_shortname;
             siteID = siteConfig.id;
             siteTitle = siteConfig.siteTitle;
             siteSubTitle = siteConfig.siteSubTitle;
@@ -134,6 +134,7 @@ namespace Muse.Web
     public class EnvironmentConfig
     {
         public string baseUrl { get; set; }
+        public string disqus_shortname { get; set; }
         public string refreshToken { get; set; }
         public string gitHubToken { get; set; }
         public GitHubDirectorySync sync { get; set; }
@@ -144,7 +145,6 @@ namespace Muse.Web
         public string id { get; set; }
         public string siteTitle { get; set; }
         public string siteSubTitle { get; set; }
-        public string disqus_shortname { get; set; }
         public string defaultImg { get; set; }
     }
 
