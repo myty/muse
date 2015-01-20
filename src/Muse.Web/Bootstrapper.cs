@@ -21,6 +21,8 @@ namespace Muse.Web
 	public class CustomBoostrapper : NinjectNancyBootstrapper
 	{
         readonly string siteBasePath = HostingEnvironment.MapPath(@"~/");
+        private BlogDB db;
+        private IApplicationConfiguration appConfig;
 
 		protected override void ConfigureConventions(NancyConventions conventions)
 		{
@@ -50,7 +52,7 @@ namespace Muse.Web
 
 		protected override void ConfigureApplicationContainer(IKernel existingContainer)
 		{
-			existingContainer
+            existingContainer
 				.Bind<BlogDB>().ToSelf()
                 .InSingletonScope();
 
@@ -61,8 +63,10 @@ namespace Muse.Web
 
             existingContainer
                 .Bind<IContentService>()
-                .To<ContentService>()
-                .InSingletonScope();
+                .To<ContentService>();
+
+            db = existingContainer.Get<BlogDB>();
+            appConfig = existingContainer.Get<IApplicationConfiguration>();
 
 			base.ConfigureApplicationContainer(existingContainer);
 		}
@@ -71,13 +75,10 @@ namespace Muse.Web
 		{
             base.ConfigureRequestContainer(container, context);
 
-            var appConfig = container.Get<IApplicationConfiguration>();
             context.ViewBag.Title = appConfig.SiteTitle;
             context.ViewBag.SubTitle = appConfig.SiteSubTitle;
-
             context.ViewBag.DefaultHeaderImage = "/img/" + appConfig.DefaultHeaderImage;
 
-            var db = container.Get<BlogDB>();
             var siteMenu = new Dictionary<string, string>();
             siteMenu.Add("Home", "/");
             foreach (var menuItem in db.Pages
