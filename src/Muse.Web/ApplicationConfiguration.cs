@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Hosting;
@@ -12,10 +13,14 @@ namespace Muse.Web
     public interface IApplicationConfiguration
     {
         bool CanRefresh(Request request);
+        Task ScanEnvironmentConfigFile();
+
         string BaseUrl { get; }
         string GitHubToken { get; }
         string DisqusShortName { get; }
         GitHubDirectorySync Sync { get; }
+
+        IDictionary<string, string> SocialLinks { get; }
 
         string SiteID { get; }
         string SiteTitle { get; }
@@ -26,18 +31,9 @@ namespace Muse.Web
     public class ApplicationConfiguration : IApplicationConfiguration
     {
         private string refreshToken;
-        private string baseUrl;
-        private string gitHubToken;
-        private string disqusShortName;
-        private GitHubDirectorySync sync;
+        readonly string environmentConfigFilePath = HostingEnvironment.MapPath("~/env.config.json");
 
         readonly FileSystemWatcher watcher = new FileSystemWatcher();
-
-        private string siteID;
-        private string siteTitle;
-        private string siteSubTitle;
-        private string defaultHeaderImage;
-
         readonly BlogDB db;
         readonly IContentService contentService;
 
@@ -46,10 +42,7 @@ namespace Muse.Web
             this.db = db;
             this.contentService = contentService;
 
-            var environmentConfigFilePath = HostingEnvironment.MapPath("~/env.config.json");
-            if (File.Exists(environmentConfigFilePath)) {
-                Task.WaitAll(ScanEnvironmentConfigFile(environmentConfigFilePath));
-            }
+            Task.WaitAll(ScanEnvironmentConfigFile());
 
             watcher.Path = Path.GetDirectoryName(environmentConfigFilePath);
             watcher.IncludeSubdirectories = false;
@@ -73,19 +66,27 @@ namespace Muse.Web
             watcher.EnableRaisingEvents = true;
         }
 
+        public async Task ScanEnvironmentConfigFile()
+        {
+            if (File.Exists(environmentConfigFilePath)) {
+                await ScanEnvironmentConfigFile(environmentConfigFilePath);
+            }
+        }
+
         private async Task ScanEnvironmentConfigFile(string environmentConfigFilePath)
         {
             var environmentConfig = JsonConvert.DeserializeObject<EnvironmentConfig>(
                 File.ReadAllText(environmentConfigFilePath));
 
-            sync = ResolvePaths(environmentConfig.sync);
             refreshToken = environmentConfig.refreshToken;
-            baseUrl = environmentConfig.baseUrl;
-            gitHubToken = environmentConfig.gitHubToken;
-            disqusShortName = environmentConfig.disqus_shortname;
 
-            var shouldSync = sync.remoteFolders
-                .Select(f => Path.Combine(sync.locaStoragePath, f))
+            Sync = ResolvePaths(environmentConfig.sync);
+            BaseUrl = environmentConfig.baseUrl;
+            GitHubToken = environmentConfig.gitHubToken;
+            DisqusShortName = environmentConfig.disqus_shortname;
+
+            var shouldSync = Sync.remoteFolders
+                .Select(f => Path.Combine(Sync.locaStoragePath, f))
                 .Any(p => !Directory.Exists(p))
                 || !db.Pages.Any()
                 || !db.Posts.Any();
@@ -94,15 +95,26 @@ namespace Muse.Web
                 await contentService.GetLatestContent(this);
             }
 
-            var siteConfigFilePath = Path.Combine(sync.locaStoragePath, "_site/config.json");
+            var siteConfigFilePath = Path.Combine(Sync.locaStoragePath, "_site/config.json");
             var siteConfig = JsonConvert.DeserializeObject<SiteConfig>(
                 File.ReadAllText(siteConfigFilePath));
 
-            siteID = siteConfig.id;
-            siteTitle = siteConfig.siteTitle;
-            siteSubTitle = siteConfig.siteSubTitle;
-            defaultHeaderImage = siteConfig.defaultImg;
+            SiteID = siteConfig.id;
+            SiteTitle = siteConfig.siteTitle;
+            SiteSubTitle = siteConfig.siteSubTitle;
+            DefaultHeaderImage = siteConfig.defaultImg;
+            SocialLinks = siteConfig.socialLinks;
         }
+
+        public string BaseUrl { get; private set; }
+        public string GitHubToken { get; private set; }
+        public string DisqusShortName { get; private set; }
+        public string SiteID { get; private set; }
+        public string SiteTitle { get; private set; }
+        public string SiteSubTitle { get; private set; }
+        public string DefaultHeaderImage { get; private set; }
+        public IDictionary<string, string> SocialLinks { get; private set; }
+        public GitHubDirectorySync Sync { get; private set; }
 
         public bool CanRefresh(Request request)
         {
@@ -110,17 +122,6 @@ namespace Muse.Web
 
             return apiKey != null && apiKey.Equals(refreshToken);
         }
-
-        public string BaseUrl { get { return baseUrl; } }
-        public string GitHubToken { get { return gitHubToken; } }
-        public string DisqusShortName { get { return disqusShortName; } }
-
-        public string SiteID { get { return siteID; } }
-        public string SiteTitle { get { return siteTitle; } }
-        public string SiteSubTitle { get { return siteSubTitle; } }
-        public string DefaultHeaderImage { get { return defaultHeaderImage; } }
-
-        public GitHubDirectorySync Sync { get { return sync; } }
 
         private GitHubDirectorySync ResolvePaths(GitHubDirectorySync dirSync)
         {
@@ -146,6 +147,7 @@ namespace Muse.Web
         public string siteTitle { get; set; }
         public string siteSubTitle { get; set; }
         public string defaultImg { get; set; }
+        public Dictionary<string, string> socialLinks { get; set; }
     }
 
     public class GitHubDirectorySync

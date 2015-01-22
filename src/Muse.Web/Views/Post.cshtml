@@ -3,6 +3,7 @@
 
 @{
     Layout = "Views/_Layout.cshtml";
+    var twitterHandle = "@mytydev"; // temporary workaround
 }
 
 <!-- Page Header -->
@@ -21,7 +22,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>S
 </header>
 
 <!-- Post Content -->
@@ -57,6 +58,7 @@
 
 @section TwitterMeta {
     <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@twitterHandle" />
     <meta name="twitter:title" content="@Model.Post.Title" />
     <meta name="twitter:description" content="@Model.Post.SubTitle" />
     <meta name="twitter:url" content="@Model.PostUrl" />

@@ -77,6 +77,8 @@ namespace Muse.Web.Services
 
                 await Task.WhenAll(syncTasks);
 
+                await config.ScanEnvironmentConfigFile();
+
                 var atomFeed = GetAtomFeed(config);
                 using (var xmlWriter = XmlWriter.Create(Path.Combine(siteBasePath, "App_Data/Content/atom.xml"))) {
                     atomFeed.SaveAsAtom10(xmlWriter);

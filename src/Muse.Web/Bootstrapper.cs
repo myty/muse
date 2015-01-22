@@ -78,6 +78,7 @@ namespace Muse.Web
             context.ViewBag.Title = appConfig.SiteTitle;
             context.ViewBag.SubTitle = appConfig.SiteSubTitle;
             context.ViewBag.DefaultHeaderImage = "/img/" + appConfig.DefaultHeaderImage;
+            context.ViewBag.SocialLinks = appConfig.SocialLinks;
 
             var siteMenu = new Dictionary<string, string>();
             siteMenu.Add("Home", "/");
