@@ -62,7 +62,8 @@ namespace Muse.Web.Modules
                     EditLink = GetEditLink(config.Sync, "_posts", String.Format(
                         "{0}/{0}-{1}-{2}-{3}.md",
                         parameters.year, parameters.month, parameters.day, parameters.slug)),
-                    Post = post
+                    Post = post,
+                    PostUrl = config.BaseUrl + post.Href
                 }];
             };
         }
