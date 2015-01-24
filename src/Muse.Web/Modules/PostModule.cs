@@ -63,7 +63,11 @@ namespace Muse.Web.Modules
                         "{0}/{0}-{1}-{2}-{3}.md",
                         parameters.year, parameters.month, parameters.day, parameters.slug)),
                     Post = post,
-                    PostUrl = config.BaseUrl + post.Href
+                    PostUrl = config.BaseUrl + post.Href,
+                    PostImageUrl = config.BaseUrl + post.HeaderBackgroundImage,
+                    TwitterHandle = config.SocialLinks.ContainsKey("twitter") ?
+                        ("@" + config.SocialLinks["twitter"]) :
+                        null
                 }];
             };
         }
