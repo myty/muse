@@ -3,7 +3,6 @@
 
 @{
     Layout = "Views/_Layout.cshtml";
-    var twitterHandle = "@mytydev"; // temporary workaround
 }
 
 <!-- Page Header -->
@@ -58,8 +57,11 @@
 
 @section TwitterMeta {
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@twitterHandle" />
+    @if (!String.IsNullOrEmpty(Model.TwitterHandle)) {
+    <meta name="twitter:site" content="@Model.TwitterHandle" />
+    }
     <meta name="twitter:title" content="@Model.Post.Title" />
     <meta name="twitter:description" content="@Model.Post.SubTitle" />
     <meta name="twitter:url" content="@Model.PostUrl" />
+    <meta name="twitter:image" content="@Model.PostImageUrl" />
 }

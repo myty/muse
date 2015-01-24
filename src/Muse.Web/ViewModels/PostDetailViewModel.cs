@@ -12,5 +12,7 @@ namespace Muse.Web.ViewModels
         public string PostUrl { get; set; }
         public string EditLink { get; set; }
         public string DisqusShortName { get; set; }
+        public string TwitterHandle { get; set; }
+        public string PostImageUrl { get; set; }
 	}
 }
