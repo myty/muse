@@ -18,6 +18,7 @@ namespace Muse.Web
         string BaseUrl { get; }
         string GitHubToken { get; }
         string DisqusShortName { get; }
+        string GoogleAnalyticsTrackingCode { get; }
         GitHubDirectorySync Sync { get; }
 
         IDictionary<string, string> SocialLinks { get; }
@@ -84,6 +85,7 @@ namespace Muse.Web
             BaseUrl = environmentConfig.baseUrl;
             GitHubToken = environmentConfig.gitHubToken;
             DisqusShortName = environmentConfig.disqus_shortname;
+            GoogleAnalyticsTrackingCode = environmentConfig.ga_tracking_code;
 
             var shouldSync = Sync.remoteFolders
                 .Select(f => Path.Combine(Sync.locaStoragePath, f))
@@ -107,6 +109,7 @@ namespace Muse.Web
         }
 
         public string BaseUrl { get; private set; }
+        public string GoogleAnalyticsTrackingCode { get; private set; }
         public string GitHubToken { get; private set; }
         public string DisqusShortName { get; private set; }
         public string SiteID { get; private set; }
@@ -136,6 +139,7 @@ namespace Muse.Web
     {
         public string baseUrl { get; set; }
         public string disqus_shortname { get; set; }
+        public string ga_tracking_code { get; set; }
         public string refreshToken { get; set; }
         public string gitHubToken { get; set; }
         public GitHubDirectorySync sync { get; set; }
