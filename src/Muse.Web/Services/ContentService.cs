@@ -130,7 +130,7 @@ namespace Muse.Web.Services
 
                     var item = new SyndicationItem(
                         p.Title,
-                        p.SubTitle,
+						SyndicationContent.CreateXhtmlContent(p.Content),
                         new Uri(config.BaseUrl + p.Href),
                         p.Href,
                         new DateTimeOffset(lastWriteTime));
