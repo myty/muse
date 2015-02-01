@@ -124,6 +124,13 @@ Things of note:
 You can test the Payload URL on your local machine using a tool like [Postman](https://chrome.google.com/webstore/detail/postman-rest-client-packa/fhbjgbiflinjbdggehcddcbncdddomop).  Instead of using the baseUrl from env.config.json, you'd just put in the local address. _For example: http://localhost:5001/update?key=supersecretkey_
 
 
+## Notable Third-Party Code In Use
+- <a href="http://nancyfx.org/" target="_blank">Nancy</a>
+- <a href="http://restsharp.org/" target="_blank">RestSharp</a>
+- <a href="http://startbootstrap.com/template-overviews/clean-blog/" target="_blank">Start Bootstrap</a>
+- <a href="https://github.com/xivSolutions/biggy" target="_blank">Biggy</a>
+
+
 ##Motivation For Muse
 1. Partly because it was needed and partly to see if it could be done.
 2. What better way to get involved in the developer community than releasing some code to the public.
