@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Muse.Web.Models;
+using System;
 using System.IO;
 using System.Linq;
 using System.ServiceModel.Syndication;
@@ -6,7 +7,6 @@ using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Xml;
 using System.Xml.Linq;
-using Muse.Web.Models;
 
 namespace Muse.Web.Services
 {
@@ -15,7 +15,7 @@ namespace Muse.Web.Services
         Task GetLatestContent(IApplicationConfiguration config);
     }
 
-    public class ContentService: IContentService
+    public class ContentService : IContentService
     {
         readonly string siteBasePath = HostingEnvironment.MapPath(@"~/");
         readonly BlogDB db;
@@ -94,10 +94,10 @@ namespace Muse.Web.Services
             XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
 
             var homepage = new XElement[] {
-					new XElement(ns + "url",
-						new XElement(ns + "loc", config.BaseUrl)
-					)
-				};
+                    new XElement(ns + "url",
+                        new XElement(ns + "loc", config.BaseUrl)
+                    )
+                };
 
             var pages = db.Pages.Select(p => new XElement(ns + "url",
                 new XElement(ns + "loc", config.BaseUrl + p.Href)
@@ -119,7 +119,8 @@ namespace Muse.Web.Services
         private SyndicationFeed GetAtomFeed(IApplicationConfiguration config)
         {
             //TODO: Make configurable
-            var defaultAuthor = new SyndicationPerson {
+            var defaultAuthor = new SyndicationPerson
+            {
                 Name = "Michael Tyson",
                 Uri = config.BaseUrl + "/about"
             };
@@ -130,7 +131,7 @@ namespace Muse.Web.Services
 
                     var item = new SyndicationItem(
                         p.Title,
-						SyndicationContent.CreateXhtmlContent(p.Content),
+                        SyndicationContent.CreateXhtmlContent(p.Content),
                         new Uri(config.BaseUrl + p.Href),
                         p.Href,
                         new DateTimeOffset(lastWriteTime));
@@ -139,7 +140,8 @@ namespace Muse.Web.Services
 
                     item.Authors.Add((p.AuthorName == null && p.AuthorUrl == null) ?
                         defaultAuthor :
-                        new SyndicationPerson {
+                        new SyndicationPerson
+                        {
                             Name = p.AuthorName,
                             Uri = (!p.AuthorUrl.StartsWith("http")) ?
                                 config.BaseUrl + p.AuthorUrl :
