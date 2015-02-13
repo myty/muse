@@ -78,7 +78,10 @@ namespace Muse.Web
             context.ViewBag.Title = appConfig.SiteTitle;
             context.ViewBag.SubTitle = appConfig.SiteSubTitle;
             context.ViewBag.DefaultHeaderImage = "/img/" + appConfig.DefaultHeaderImage;
-            context.ViewBag.SocialLinks = appConfig.SocialLinks;
+            context.ViewBag.SocialLinks = appConfig.SocialLinks.Select(s => new SocialLink {
+                Site = s.Key,
+                Username = s.Value
+            }).ToArray();
             context.ViewBag.GATrackingCode = appConfig.GoogleAnalyticsTrackingCode;
 
             var siteMenu = new Dictionary<string, string>();
