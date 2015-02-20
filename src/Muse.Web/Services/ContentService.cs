@@ -1,12 +1,16 @@
 ﻿using Muse.Web.Models;
+using ReactiveGit;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Xml;
 using System.Xml.Linq;
+using LibGit2Sharp;
 
 namespace Muse.Web.Services
 {
@@ -27,66 +31,99 @@ namespace Muse.Web.Services
 
         public async Task GetLatestContent(IApplicationConfiguration config)
         {
-            if (!String.IsNullOrWhiteSpace(config.GitHubToken)) {
-                var syncTasks = config.Sync.remoteFolders.Select(folder => {
-                    var localDirectory = new DirectoryInfo(Path.Combine(config.Sync.locaStoragePath, folder));
-                    if (!localDirectory.Exists) {
-                        localDirectory.Create();
+            var repoURL = String.Format("https://github.com/{0}/{1}.git",
+                config.Sync.owner, config.Sync.repo);
+            bool cloneRepo = false;
+            var cloneObserver = new ReplaySubject<Tuple<string, int>>();
+
+            var localDirectory = new DirectoryInfo(config.Sync.locaStoragePath);
+            if (!localDirectory.Exists) {
+                localDirectory.Create();
+            }
+
+            if (!Directory.Exists(config.Sync.locaStoragePath + @"\.git")) {
+                //flag to clone repo
+                cloneRepo = true;
+            } else {
+                try {
+                    //pull changes from repo
+                    using (var repo = new ObservableRepository(config.Sync.locaStoragePath)) {
+                        var u = await repo.Checkout(repo.Inner.Branches["master"], cloneObserver);
+                        var mergeResult = await repo.Pull(cloneObserver);
+                        if (config.Sync.branch != "master") {
+                            u = await repo.Checkout(repo.Inner.Branches["origin/" + config.Sync.branch], cloneObserver);
+                        }
                     }
+                } catch {
+                    //if cant pull changes, flag that the content should be cloned
+                    cloneRepo = true;
+                }
+            }
 
-                    var githubMirror = GitHubMirror.Create(config.Sync, folder, config.GitHubToken);
-
-                    if (folder == "_posts") {
-                        return githubMirror.SynchronizeAsync().ContinueWith(t => {
-                            var deletePosts = db.Posts
-                                .Select(p => p.FileLocation)
-                                .Select(f => Path.Combine(siteBasePath, f))
-                                .Where(f => !File.Exists(f))
-                                .ToArray();
-
-                            var postsUpdater = new PostUpdater(db);
-                            foreach (var file in deletePosts) {
-                                postsUpdater.FileDeleted(file);
-                            }
-
-                            foreach (var file in Directory.EnumerateFiles(localDirectory.FullName, "*", SearchOption.AllDirectories)) {
-                                postsUpdater.FileUpdated(file);
-                            }
-                        });
-                    } else if (folder == "_pages") {
-                        return githubMirror.SynchronizeAsync().ContinueWith(t => {
-                            var deletePages = db.Pages
-                                .Select(p => p.FileLocation)
-                                .Select(f => Path.Combine(siteBasePath, f))
-                                .Where(f => !File.Exists(f))
-                                .ToArray();
-
-                            var pagesUpdater = new PageUpdater(db);
-                            foreach (var file in deletePages) {
-                                pagesUpdater.FileDeleted(file);
-                            }
-
-                            foreach (var file in Directory.EnumerateFiles(localDirectory.FullName, "*", SearchOption.AllDirectories)) {
-                                pagesUpdater.FileUpdated(file);
-                            }
-                        });
-                    }
-
-                    return githubMirror.SynchronizeAsync(false);
-                });
-
-                await Task.WhenAll(syncTasks);
-
-                await config.ScanEnvironmentConfigFile();
-
-                var atomFeed = GetAtomFeed(config);
-                using (var xmlWriter = XmlWriter.Create(Path.Combine(siteBasePath, "App_Data/Content/atom.xml"))) {
-                    atomFeed.SaveAsAtom10(xmlWriter);
+            if (cloneRepo) {
+                //clean directory if any files or subdirectories exist
+                foreach (FileInfo file in localDirectory.GetFiles()) {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in localDirectory.GetDirectories()) {
+                    dir.Delete(true);
                 }
 
-                var sitemap = GetSitemap(config);
-                File.WriteAllText(Path.Combine(siteBasePath, "App_Data/Content/sitemap.xml"), sitemap.ToString());
+                using (var repo = await ObservableRepository.Clone(
+                    repoURL,
+                    config.Sync.locaStoragePath,
+                    cloneObserver)) {
+                    if (config.Sync.branch != "master") {
+                        var u = await repo.Checkout(repo.Inner.Branches["origin/" + config.Sync.branch], cloneObserver);
+                    }
+                }
             }
+
+            //scan _posts directory
+            var deletePosts = db.Posts
+                .Select(p => p.FileLocation)
+                .Select(f => Path.Combine(siteBasePath, f))
+                .Where(f => !File.Exists(f))
+                .ToArray();
+            var postsUpdater = new PostUpdater(db);
+            foreach (var file in deletePosts) {
+                postsUpdater.FileDeleted(file);
+            }
+
+            var posts = localDirectory.GetDirectories()
+                .Where(d => d.Name == "_posts")
+                .SelectMany(d => d.EnumerateFiles("*", SearchOption.AllDirectories));
+            foreach (var file in posts) {
+                postsUpdater.FileUpdated(file.FullName);
+            }
+
+            //scan _pages directory
+            var deletePages = db.Pages
+                .Select(p => p.FileLocation)
+                .Select(f => Path.Combine(siteBasePath, f))
+                .Where(f => !File.Exists(f))
+                .ToArray();
+            var pagesUpdater = new PageUpdater(db);
+            foreach (var file in deletePages) {
+                pagesUpdater.FileDeleted(file);
+            }
+
+            var pages = localDirectory.GetDirectories()
+                .Where(d => d.Name == "_pages")
+                .SelectMany(d => d.EnumerateFiles("*", SearchOption.AllDirectories));
+            foreach (var file in posts) {
+                pagesUpdater.FileUpdated(file.FullName);
+            }
+
+            await config.ScanEnvironmentConfigFile();
+
+            var atomFeed = GetAtomFeed(config);
+            using (var xmlWriter = XmlWriter.Create(Path.Combine(siteBasePath, "App_Data/Content/atom.xml"))) {
+                atomFeed.SaveAsAtom10(xmlWriter);
+            }
+
+            var sitemap = GetSitemap(config);
+            File.WriteAllText(Path.Combine(siteBasePath, "App_Data/Content/sitemap.xml"), sitemap.ToString());
         }
 
         private XElement GetSitemap(IApplicationConfiguration config)
@@ -169,6 +206,5 @@ namespace Muse.Web.Services
 
             return feed;
         }
-
     }
 }
